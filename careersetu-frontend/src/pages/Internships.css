@@ -1,0 +1,55 @@
+.internships-page {}
+
+.intern-filter-bar {
+  display: flex;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: var(--radius-lg);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.interns-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.intern-card { padding: 20px; }
+.ic-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.ic-logo {
+  width: 44px; height: 44px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 14px; flex-shrink: 0;
+}
+.ic-info { flex: 1; min-width: 0; }
+.ic-title { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+.ic-company { font-size: 12px; color: var(--text-muted); }
+.ic-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.ic-meta span { display: flex; align-items: center; gap: 4px; }
+.ic-skills { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px; }
+.ic-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-light);
+}
+.ic-deadline { font-size: 12px; color: var(--text-muted); }
+
+.intern-tips { padding: 28px; }
+
+@media (max-width: 1024px) { .interns-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px) { .interns-grid { grid-template-columns: 1fr; } }

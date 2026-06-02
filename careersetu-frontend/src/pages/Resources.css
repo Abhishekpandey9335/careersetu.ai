@@ -1,0 +1,54 @@
+.blog-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.blog-card { padding: 20px; }
+.blog-meta-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.blog-title { font-size: 15px; font-weight: 700; line-height: 1.5; margin-bottom: 10px; }
+.blog-footer { display: flex; justify-content: space-between; }
+
+.resources-three-col {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+
+.schemes-list { display: flex; flex-direction: column; gap: 12px; }
+.scheme-card { padding: 16px; }
+.scheme-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+.scheme-title { font-size: 14px; font-weight: 700; flex: 1; margin-right: 8px; }
+.scheme-desc { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
+.scheme-link { font-size: 13px; font-weight: 600; color: var(--primary); text-decoration: none; }
+
+.scholarships-list { display: flex; flex-direction: column; gap: 12px; }
+.scholarship-card { padding: 16px; display: flex; gap: 12px; align-items: flex-start; }
+.scholarship-icon { font-size: 24px; flex-shrink: 0; }
+.scholarship-name { font-size: 14px; font-weight: 700; }
+
+.webinars-list { display: flex; flex-direction: column; gap: 12px; }
+.webinar-card { padding: 16px; }
+.webinar-header { display: flex; align-items: center; margin-bottom: 8px; }
+.webinar-title { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+.webinar-speaker { display: flex; align-items: center; gap: 8px; }
+.speaker-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--purple));
+  color: #fff; font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+
+.news-list { display: flex; flex-direction: column; gap: 10px; }
+.news-item { display: flex; align-items: center; gap: 14px; padding: 16px 20px; }
+.news-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--primary); flex-shrink: 0; }
+.news-headline { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+.news-time { font-size: 12px; color: var(--text-muted); }
+.news-read-more { font-size: 13px; font-weight: 600; color: var(--primary); text-decoration: none; flex-shrink: 0; }
+
+@media (max-width: 1024px) {
+  .blog-grid { grid-template-columns: repeat(2, 1fr); }
+  .resources-three-col { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .blog-grid { grid-template-columns: 1fr; }
+}

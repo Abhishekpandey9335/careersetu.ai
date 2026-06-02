@@ -1,0 +1,59 @@
+.se-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.se-list {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px;
+  position: sticky;
+  top: 76px;
+  max-height: calc(100vh - 160px);
+  overflow-y: auto;
+}
+
+.se-list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s;
+  margin-bottom: 4px;
+}
+.se-list-item:hover { background: var(--bg-gray); }
+.se-list-item.active { background: var(--primary-light); }
+
+.se-detail {}
+
+.se-hero { padding: 24px; }
+.se-hero-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; flex-wrap: wrap; }
+.se-role-title { font-size: 24px; font-weight: 800; margin-bottom: 4px; }
+.se-avg-box { text-align: right; flex-shrink: 0; }
+.se-avg-sal { font-size: 32px; font-weight: 800; color: var(--secondary); }
+
+.se-salary-table { padding: 24px; }
+.se-salary-bars { display: flex; flex-direction: column; gap: 16px; }
+.se-salary-row { display: grid; grid-template-columns: 160px 1fr 160px; align-items: center; gap: 14px; }
+.se-exp-label { font-size: 13px; font-weight: 600; }
+.se-bar-wrap {}
+.se-range { font-size: 13px; font-weight: 700; color: var(--primary); text-align: right; }
+
+@media (max-width: 1024px) {
+  .se-layout { grid-template-columns: 1fr; }
+  .se-list { position: static; max-height: none; display: flex; flex-wrap: wrap; gap: 8px; }
+  .se-list-item { width: auto; flex: none; }
+  .se-salary-row { grid-template-columns: 140px 1fr 120px; }
+}
+@media (max-width: 640px) {
+  .se-salary-row { grid-template-columns: 1fr; gap: 6px; }
+}

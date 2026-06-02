@@ -1,0 +1,82 @@
+spring:
+  application:
+    name: careersetu-backend
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/careersetu}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 20000
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        default_batch_fetch_size: 20
+
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: 587
+    username: ${MAIL_USERNAME:noreply@careersetu.in}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+
+server:
+  port: ${PORT:8080}
+  servlet:
+    context-path: /api
+
+jwt:
+  secret: ${JWT_SECRET:careersetu-super-secret-key-change-in-production-must-be-256-bits-long!!}
+  expiration: 86400000
+  refresh-expiration: 604800000
+
+ai:
+  grok-api-url: https://api.groq.com/openai/v1/chat/completions
+  grok-api-key: ${GROK_API_KEY}
+  openai-api-url: https://api.openai.com/v1/chat/completions
+  openai-api-key: ${OPENAI_API_KEY:}
+  provider: ${AI_PROVIDER:grok}
+
+razorpay:
+  key-id: ${RAZORPAY_KEY_ID:}
+  key-secret: ${RAZORPAY_KEY_SECRET:}
+
+cors:
+  allowed-origins: ${CORS_ORIGINS:http://localhost:5173,https://careersetu.in}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+logging:
+  level:
+    com.careersetu: DEBUG
+    org.springframework.security: WARN
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

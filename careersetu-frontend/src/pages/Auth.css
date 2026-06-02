@@ -1,0 +1,160 @@
+.auth-page {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.auth-left {
+  background: linear-gradient(135deg, var(--navy) 0%, #2d3f8a 50%, var(--navy-mid) 100%);
+  padding: 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+.auth-left::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(126,58,242,0.2) 0%, transparent 70%);
+  pointer-events: none;
+}
+.auth-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 48px; }
+.auth-logo {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, var(--primary), var(--purple));
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 800;
+  font-size: 16px;
+}
+.auth-brand-name { font-size: 20px; font-weight: 800; }
+.auth-brand-tag { font-size: 12px; color: rgba(255,255,255,0.6); }
+.auth-hero-title { font-size: 32px; font-weight: 800; line-height: 1.3; margin-bottom: 14px; }
+.auth-hero-sub { font-size: 16px; color: rgba(255,255,255,0.7); margin-bottom: 36px; }
+.auth-features { display: flex; flex-direction: column; gap: 14px; }
+.auth-feature-item { display: flex; gap: 12px; align-items: flex-start; font-size: 15px; color: rgba(255,255,255,0.9); }
+
+.auth-right {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  background: var(--bg-gray);
+}
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  padding: 36px;
+}
+.auth-title { font-size: 26px; font-weight: 800; margin-bottom: 6px; }
+.auth-sub { font-size: 14px; color: var(--text-muted); margin-bottom: 24px; }
+
+.social-logins {}
+.social-btn {
+  width: 100%;
+  padding: 11px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  background: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.15s;
+}
+.social-btn:hover { background: var(--bg-gray); border-color: var(--primary); }
+.social-btn span {
+  width: 24px;
+  height: 24px;
+  background: linear-gradient(135deg, #ea4335, #4285f4);
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 12px;
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+.auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+.password-wrap { position: relative; }
+.password-wrap .input { padding-right: 44px; }
+.pw-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+}
+
+.auth-helper { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; font-size: 13px; }
+.remember-label { display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--text-secondary); }
+.forgot-link { color: var(--primary); font-weight: 600; text-decoration: none; }
+.forgot-link:hover { text-decoration: underline; }
+
+.otp-login { margin-top: 12px; }
+
+.auth-switch { text-align: center; margin-top: 20px; font-size: 14px; color: var(--text-muted); }
+.auth-switch-link { color: var(--primary); font-weight: 700; text-decoration: none; }
+
+.terms-text { font-size: 12px; color: var(--text-muted); margin-bottom: 12px; }
+.terms-text a { color: var(--primary); }
+
+@media (max-width: 768px) {
+  .auth-page { grid-template-columns: 1fr; }
+  .auth-left { display: none; }
+  .auth-right { padding: 24px; min-height: 100vh; background: #fff; }
+}
+/* Add this block to the existing Auth.css file (append to end) */
+
+.auth-error-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fdf2f2;
+  border: 1px solid #f8b4b4;
+  color: #c81e1e;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13.5px;
+  margin-bottom: 16px;
+  line-height: 1.4;
+}
+
+.chat-login-prompt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ebf5ff;
+  border: 1px solid #bfdbfe;
+  color: #1e40af;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 13px;
+  margin: 8px 16px;
+}

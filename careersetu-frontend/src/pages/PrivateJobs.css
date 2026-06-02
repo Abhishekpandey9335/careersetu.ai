@@ -1,0 +1,68 @@
+.pj-tabs-bar {
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+}
+.pj-tab {
+  padding: 14px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.pj-tab:hover { color: var(--primary); }
+.pj-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+.pj-filter-bar {
+  display: flex;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: var(--radius-lg);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.job-list { display: flex; flex-direction: column; gap: 12px; }
+
+.job-list-card {
+  display: flex;
+  gap: 16px;
+  padding: 20px;
+  align-items: flex-start;
+}
+.jlc-left { flex-shrink: 0; }
+.jlc-logo {
+  width: 52px;
+  height: 52px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 15px;
+}
+.jlc-middle { flex: 1; min-width: 0; }
+.jlc-top { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; flex-wrap: wrap; }
+.jlc-title { font-size: 16px; font-weight: 700; color: var(--text-primary); }
+.jlc-company { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
+.jlc-meta { display: flex; gap: 16px; font-size: 12px; color: var(--text-muted); margin-bottom: 10px; flex-wrap: wrap; }
+.jlc-meta span { display: flex; align-items: center; gap: 4px; }
+.jlc-skills { display: flex; flex-wrap: wrap; gap: 6px; }
+.jlc-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+  min-width: 140px;
+}
+.jlc-salary { font-size: 15px; font-weight: 700; color: var(--secondary); }
+
+@media (max-width: 768px) {
+  .job-list-card { flex-wrap: wrap; }
+  .jlc-right { align-items: flex-start; width: 100%; flex-direction: row; flex-wrap: wrap; }
+  .pj-filter-bar { flex-direction: column; }
+}

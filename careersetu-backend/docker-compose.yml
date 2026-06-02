@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: careersetu-postgres
+    environment:
+      POSTGRES_DB: careersetu
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: careersetu-backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/careersetu
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      JWT_SECRET: careersetu-super-secret-jwt-key-minimum-256-bits-for-production!!
+      AI_PROVIDER: grok
+      GROK_API_KEY: ${GROK_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID:-}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET:-}
+      CORS_ORIGINS: http://localhost:5173,http://localhost:3000
+      MAIL_HOST: smtp.gmail.com
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
