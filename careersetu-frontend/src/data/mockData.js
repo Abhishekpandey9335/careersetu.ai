@@ -12,13 +12,12 @@ export const govtExams = [
 ];
 
 export const privateJobs = [
-  { id: 1, companyName: 'TCS', title: 'System Engineer', type: 'FULL_TIME', location: 'Pan India', salaryMin: 350000, salaryMax: 700000, skillsRequired: ['Java', 'Python', 'SQL'], qualification: 'B.Tech/MCA', experienceMin: 0, experienceMax: 2 },
-  { id: 2, companyName: 'Infosys', title: 'Associate Consultant', type: 'FULL_TIME', location: 'Bangalore', salaryMin: 400000, salaryMax: 800000, skillsRequired: ['Java', 'Spring Boot'], qualification: 'B.Tech/MBA', experienceMin: 0, experienceMax: 2 },
-  { id: 3, companyName: 'Wipro', title: 'Project Engineer', type: 'FULL_TIME', location: 'Hyderabad', salaryMin: 350000, salaryMax: 600000, skillsRequired: ['React', 'Node.js'], qualification: 'B.Tech', experienceMin: 0, experienceMax: 1 },
-  { id: 4, companyName: 'Accenture', title: 'Associate Software Eng.', type: 'FULL_TIME', location: 'Mumbai', salaryMin: 650000, salaryMax: 700000, skillsRequired: ['Python', 'AI/ML'], qualification: 'B.Tech', experienceMin: 0, experienceMax: 2 },
-  { id: 5, companyName: 'Capgemini', title: 'Analyst', type: 'FULL_TIME', location: 'Pune', salaryMin: 300000, salaryMax: 600000, skillsRequired: ['Java', 'Testing'], qualification: 'B.Tech', experienceMin: 0, experienceMax: 2 },
+  { id: 1, companyName: 'TCS', title: 'System Engineer', type: 'FULL_TIME', location: 'Pan India', salaryMin: 350000, salaryMax: 700000, skillsRequired: ['Java', 'Python', 'SQL'], qualification: 'B.Tech/MCA', experienceMin: 0, experienceMax: 2, applyLink: 'https://www.tcs.com/careers' },
+  { id: 2, companyName: 'Infosys', title: 'Associate Consultant', type: 'FULL_TIME', location: 'Bangalore', salaryMin: 400000, salaryMax: 800000, skillsRequired: ['Java', 'Spring Boot'], qualification: 'B.Tech/MBA', experienceMin: 0, experienceMax: 2, applyLink: 'https://career.infosys.com' },
+  { id: 3, companyName: 'Wipro', title: 'Project Engineer', type: 'FULL_TIME', location: 'Hyderabad', salaryMin: 350000, salaryMax: 600000, skillsRequired: ['React', 'Node.js'], qualification: 'B.Tech', experienceMin: 0, experienceMax: 1, applyLink: 'https://careers.wipro.com' },
+  { id: 4, companyName: 'Accenture', title: 'Associate Software Eng.', type: 'FULL_TIME', location: 'Mumbai', salaryMin: 650000, salaryMax: 700000, skillsRequired: ['Python', 'AI/ML'], qualification: 'B.Tech', experienceMin: 0, experienceMax: 2, applyLink: 'https://www.accenture.com/in-en/careers' },
+  { id: 5, companyName: 'Capgemini', title: 'Analyst', type: 'FULL_TIME', location: 'Pune', salaryMin: 300000, salaryMax: 600000, skillsRequired: ['Java', 'Testing'], qualification: 'B.Tech', experienceMin: 0, experienceMax: 2, applyLink: 'https://www.capgemini.com/in-en/careers' },
 ];
-
 export const internships = [
   { id: 1, companyName: 'Google', title: 'SWE Intern', type: 'INTERNSHIP', location: 'Bangalore', salaryMin: 80000, salaryMax: 100000, skillsRequired: ['Python', 'Algorithms'], experienceMin: 0 },
   { id: 2, companyName: 'Microsoft', title: 'Product Management Intern', type: 'INTERNSHIP', location: 'Hyderabad', salaryMin: 70000, salaryMax: 90000, skillsRequired: ['Analytics', 'Product'], experienceMin: 0 },
