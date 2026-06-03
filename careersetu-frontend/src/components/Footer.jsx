@@ -64,8 +64,8 @@ export default function Footer() {
         </div>
 
         <div className="footer-bottom">
-          <p>© 2024 CareerSetu. All Rights Reserved.</p>
-          <p>Made with ❤️ for Indian Students</p>
+          <p>© 2026 CareerSetu. All Rights Reserved.</p>
+          <p>Design and devloped by Abhishek Pandey <br> contact for creating website 9335203841 </p>
         </div>
       </div>
     </footer>
