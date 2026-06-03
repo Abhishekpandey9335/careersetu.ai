@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Search, Bell, Menu, X, ChevronDown, Sparkles, User, LogOut, LayoutDashboard, Crown } from 'lucide-react';
+import { Search, Bell, Menu, X, ChevronDown, Sparkles, LogOut, LayoutDashboard, Crown } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
 
@@ -54,6 +54,15 @@ export default function Navbar() {
             AI Advisor
             <span className="new-badge">New</span>
           </Link>
+          {isLoggedIn && (
+            <Link
+              to="/dashboard"
+              className={`nav-link nav-link-dashboard ${location.pathname === '/dashboard' ? 'active' : ''}`}
+            >
+              <LayoutDashboard size={14} />
+              Dashboard
+            </Link>
+          )}
         </div>
 
         <div className="navbar-right">
@@ -136,6 +145,11 @@ export default function Navbar() {
           <Link to="/ai-advisor" className="mobile-nav-link ai-link" onClick={() => setMobileOpen(false)}>
             <Sparkles size={14} /> AI Advisor
           </Link>
+          {isLoggedIn && (
+            <Link to="/dashboard" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>
+              <LayoutDashboard size={14} /> Dashboard
+            </Link>
+          )}
           {!isLoggedIn && (
             <div className="mobile-auth">
               <Link to="/login" className="btn btn-outline" onClick={() => setMobileOpen(false)}>Login</Link>
