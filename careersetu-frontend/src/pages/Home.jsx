@@ -2,13 +2,11 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
   ArrowRight, ChevronRight, Sparkles, Bot, Send, 
-  CheckCircle, TrendingUp, Star, Users, BookOpen,
-  Building2, MapPin, Briefcase, Calendar, Clock,
-  Download, Play, FileText, ExternalLink
+  CheckCircle, TrendingUp, MapPin, Briefcase, Calendar, Clock
 } from 'lucide-react';
-import { 
-  govtExams, privateJobs, roadmaps, companies, studyMaterials, 
-  successStories, upcomingDates, quickLinksData 
+import {
+  govtExams, privateJobs, roadmaps, companies,
+  successStories, upcomingDates, quickLinksData
 } from '../data/mockData';
 import './Home.css';
 
@@ -143,15 +141,7 @@ function AiWidget() {
 }
 
 export default function Home() {
-  const [qualification, setQualification] = useState('');
-  const [year, setYear] = useState('');
-  const [stream, setStream] = useState('');
-  const [goal, setGoal] = useState('both');
   const navigate = useNavigate();
-
-  const handleGenerate = () => {
-    navigate('/dashboard');
-  };
 
   return (
     <div className="home">
@@ -159,6 +149,7 @@ export default function Home() {
       <section className="hero">
         <div className="container">
           <div className="hero-grid">
+            {/* Left */}
             <div className="hero-left fade-in-up">
               <div className="hero-badge">
                 <Sparkles size={14} /> India's #1 AI-Powered Career Platform
@@ -179,80 +170,69 @@ export default function Home() {
                   </div>
                 ))}
               </div>
+              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 16 }}>
+                <Link to="/govt-exams" className="btn btn-primary btn-lg">
+                  🏛️ Explore Govt Jobs <ArrowRight size={16} />
+                </Link>
+                <Link to="/private-jobs" className="btn btn-outline btn-lg">
+                  💼 Find Private Jobs
+                </Link>
+              </div>
             </div>
 
-            {/* Career form */}
-            <div className="career-form-card card fade-in-up" style={{animationDelay:'0.1s'}}>
-              <h2 className="career-form-title">Find Your Best Career Path</h2>
-              <p className="career-form-sub">Tell us about yourself and get personalized recommendations</p>
-              <div className="career-form-grid">
-                <div className="form-group">
-                  <label className="label">Select Qualification</label>
-                  <select className="input select" value={qualification} onChange={e => setQualification(e.target.value)}>
-                    <option value="">Select</option>
-                    <option>Class 10</option>
-                    <option>Class 12</option>
-                    <option>Graduation</option>
-                    <option>Post Graduation</option>
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label className="label">Current Year</label>
-                  <select className="input select" value={year} onChange={e => setYear(e.target.value)}>
-                    <option value="">Select</option>
-                    <option>1st Year</option>
-                    <option>2nd Year</option>
-                    <option>3rd Year</option>
-                    <option>Final Year</option>
-                    <option>Passed Out</option>
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label className="label">Stream / Branch</label>
-                  <select className="input select" value={stream} onChange={e => setStream(e.target.value)}>
-                    <option value="">Select Stream</option>
-                    <option>Science (PCM)</option>
-                    <option>Science (PCB)</option>
-                    <option>Commerce</option>
-                    <option>Arts / Humanities</option>
-                    <option>B.Tech / Engineering</option>
-                    <option>B.Sc</option>
-                    <option>B.Com</option>
-                    <option>BA</option>
-                    <option>MBA</option>
-                    <option>Other</option>
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label className="label">Skills (Optional)</label>
-                  <input className="input" placeholder="Select or type your skills" />
-                </div>
-                <div className="form-group">
-                  <label className="label">Interested In</label>
-                  <div className="goal-tabs">
-                    {['Govt Jobs', 'Private Jobs', 'Both'].map(g => (
-                      <button key={g} className={`goal-tab ${goal === g.toLowerCase().replace(' ', '_') || (g === 'Both' && goal === 'both') ? 'active' : ''}`}
-                        onClick={() => setGoal(g === 'Both' ? 'both' : g.toLowerCase().replace(' ', '_'))}>
-                        {g}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div className="form-group">
-                  <label className="label">Expected Salary (Optional)</label>
-                  <select className="input select">
-                    <option value="">Select</option>
-                    <option>3-5 LPA</option>
-                    <option>5-10 LPA</option>
-                    <option>10-20 LPA</option>
-                    <option>20+ LPA</option>
-                  </select>
-                </div>
+            {/* Right — Feature Cards */}
+            <div className="hero-right fade-in-up" style={{ animationDelay: '0.1s' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                {[
+                  { icon: '🏛️', title: 'Govt Exams', desc: '25,000+ notifications', color: '#1a56db', path: '/govt-exams' },
+                  { icon: '💼', title: 'Private Jobs', desc: '15,000+ openings', color: '#7e3af2', path: '/private-jobs' },
+                  { icon: '🎓', title: 'Internships', desc: '5,000+ opportunities', color: '#0e9f6e', path: '/internships' },
+                  { icon: '🤖', title: 'AI Advisor', desc: 'Personalized guidance', color: '#f59e0b', path: '/ai-advisor' },
+                  { icon: '📚', title: 'Study Material', desc: 'Free resources', color: '#ef4444', path: '/study-material' },
+                  { icon: '🗺️', title: 'Roadmaps', desc: 'Step-by-step plans', color: '#0ea5e9', path: '/roadmaps' },
+                ].map(item => (
+                  <Link key={item.title} to={item.path} style={{ textDecoration: 'none' }}>
+                    <div style={{
+                      background: 'white',
+                      borderRadius: 16,
+                      padding: '20px 16px',
+                      boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+                      border: '1px solid #e5e7eb',
+                      cursor: 'pointer',
+                      transition: 'transform 0.2s, box-shadow 0.2s',
+                      textAlign: 'center',
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 8px 30px rgba(0,0,0,0.12)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.08)'; }}
+                    >
+                      <div style={{ fontSize: 32, marginBottom: 8 }}>{item.icon}</div>
+                      <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 4 }}>{item.title}</div>
+                      <div style={{ fontSize: 12, color: item.color, fontWeight: 600 }}>{item.desc}</div>
+                    </div>
+                  </Link>
+                ))}
               </div>
-              <button className="btn btn-primary btn-xl w-full" onClick={handleGenerate} style={{justifyContent:'center'}}>
-                <Sparkles size={16} /> Generate My Dashboard
-              </button>
-              <p className="form-note">100% Free • No Credit Card Required</p>
+
+              {/* AI Banner */}
+              <div style={{
+                marginTop: 16,
+                background: 'linear-gradient(135deg, #1a56db 0%, #7e3af2 100%)',
+                borderRadius: 16,
+                padding: '20px 24px',
+                color: 'white',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 12,
+              }}>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 4 }}>🤖 Try AI Career Advisor</div>
+                  <div style={{ fontSize: 13, opacity: 0.9 }}>Get personalized career recommendations in seconds</div>
+                </div>
+                <Link to="/ai-advisor" className="btn" style={{ background: 'white', color: '#1a56db', fontWeight: 700, whiteSpace: 'nowrap', padding: '8px 16px', borderRadius: 8, fontSize: 13 }}>
+                  Try Now →
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -299,7 +279,6 @@ export default function Home() {
 
               {/* Eligibility + Salary + Company Readiness */}
               <div className="widgets-row" style={{marginTop: 40}}>
-                {/* Eligibility Checker */}
                 <div className="widget-card card-flat">
                   <h3 className="widget-title">Eligibility Checker</h3>
                   <p className="widget-sub">Check all exams you are eligible for</p>
@@ -338,7 +317,6 @@ export default function Home() {
                   <Link to="/eligibility-checker" className="btn btn-primary w-full" style={{justifyContent:'center',marginTop:12}}>Check Eligible Exams</Link>
                 </div>
 
-                {/* Salary Explorer */}
                 <div className="widget-card card-flat">
                   <h3 className="widget-title">Salary Explorer</h3>
                   <p className="widget-sub">Explore salary, growth & more</p>
@@ -360,7 +338,6 @@ export default function Home() {
                   <Link to="/salary-explorer" className="section-link" style={{marginTop:12}}>View Detailed Report →</Link>
                 </div>
 
-                {/* Company Readiness */}
                 <div className="widget-card card-flat">
                   <h3 className="widget-title">Company Readiness Score</h3>
                   <p className="widget-sub">See how ready you are for top companies</p>
@@ -470,8 +447,6 @@ export default function Home() {
             {/* Right sidebar */}
             <div className="home-right">
               <AiWidget />
-
-              {/* Exam Calendar */}
               <div className="card-flat sidebar-card" style={{marginTop:20}}>
                 <div className="sidebar-card-header">
                   <Calendar size={15} style={{color:'var(--primary)'}} />
@@ -490,8 +465,6 @@ export default function Home() {
                   ))}
                 </div>
               </div>
-
-              {/* Premium CTA */}
               <div className="premium-sidebar card" style={{marginTop:20}}>
                 <div className="premium-crown">👑</div>
                 <h3>Go Premium</h3>
@@ -506,8 +479,6 @@ export default function Home() {
                   Upgrade — ₹99/mo
                 </Link>
               </div>
-
-              {/* Subscribe */}
               <div className="subscribe-sidebar card-flat" style={{marginTop:20}}>
                 <h3>Get Important Updates</h3>
                 <p>Never miss any important updates and notifications</p>
