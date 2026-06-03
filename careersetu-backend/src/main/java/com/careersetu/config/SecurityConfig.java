@@ -55,6 +55,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/study-materials/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/roadmaps/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/home/**").permitAll()
+                .requestMatchers("/ping").permitAll()
                 // Admin only
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 // Everything else needs auth
