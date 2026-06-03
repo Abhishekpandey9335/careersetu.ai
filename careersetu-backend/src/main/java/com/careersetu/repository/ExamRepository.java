@@ -19,19 +19,27 @@ public interface ExamRepository extends JpaRepository<Exam, Long> {
 
     Page<Exam> findByCategory(Exam.ExamCategory category, Pageable pageable);
 
-    @Query("SELECT e FROM Exam e WHERE e.status = 'FORM_OPEN' ORDER BY e.formEnd ASC")
+    @Query(value = "SELECT * FROM exams e WHERE e.status = 'FORM_OPEN' ORDER BY e.form_end ASC LIMIT 20",
+            nativeQuery = true)
     List<Exam> findActiveFormOpenExams(Pageable pageable);
 
-    @Query("""
-        SELECT e FROM Exam e
-        WHERE (:category IS NULL OR e.category = :category)
-          AND (:status IS NULL OR e.status = :status)
-          AND (:search IS NULL OR LOWER(e.name) LIKE LOWER(CONCAT('%', :search, '%')))
-        ORDER BY e.formEnd ASC NULLS LAST
-        """)
+    @Query(value = """
+        SELECT * FROM exams e
+        WHERE (:category IS NULL OR e.category = CAST(:category AS VARCHAR))
+          AND (:status IS NULL OR e.status = CAST(:status AS VARCHAR))
+          AND (:search IS NULL OR LOWER(CAST(e.name AS TEXT)) LIKE LOWER(CONCAT('%', :search, '%')))
+        ORDER BY e.form_end ASC NULLS LAST
+        """,
+            countQuery = """
+        SELECT COUNT(*) FROM exams e
+        WHERE (:category IS NULL OR e.category = CAST(:category AS VARCHAR))
+          AND (:status IS NULL OR e.status = CAST(:status AS VARCHAR))
+          AND (:search IS NULL OR LOWER(CAST(e.name AS TEXT)) LIKE LOWER(CONCAT('%', :search, '%')))
+        """,
+            nativeQuery = true)
     Page<Exam> searchExams(
-            @Param("category") Exam.ExamCategory category,
-            @Param("status") Exam.ExamStatus status,
+            @Param("category") String category,
+            @Param("status") String status,
             @Param("search") String search,
             Pageable pageable
     );

@@ -20,12 +20,13 @@ public class ExamService {
     private final ExamRepository examRepository;
 
     public Page<ExamSummaryDto> searchExams(Exam.ExamCategory category,
-                                             Exam.ExamStatus status,
-                                             String search,
-                                             int page, int size, String sortBy) {
-        Pageable pageable = PageRequest.of(page, size,
-                Sort.by(Sort.Direction.DESC, sortBy.equals("salary") ? "salaryMax" : "createdAt"));
-        return examRepository.searchExams(category, status, search, pageable)
+                                            Exam.ExamStatus status,
+                                            String search,
+                                            int page, int size, String sortBy) {
+        Pageable pageable = PageRequest.of(page, size);
+        String categoryStr = (category != null) ? category.name() : null;
+        String statusStr = (status != null) ? status.name() : null;
+        return examRepository.searchExams(categoryStr, statusStr, search, pageable)
                 .map(this::toSummaryDto);
     }
 
