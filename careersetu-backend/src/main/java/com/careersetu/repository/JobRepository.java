@@ -14,22 +14,22 @@ import java.util.List;
 public interface JobRepository extends JpaRepository<Job, Long> {
 
     @Query(value = """
-        SELECT * FROM jobs j
-        WHERE j.status = 'ACTIVE'
-          AND (:type IS NULL OR j.type = CAST(:type AS VARCHAR))
-          AND (:location IS NULL OR LOWER(j.location::text) LIKE LOWER(CONCAT('%', :location, '%')))
-          AND (:salaryMin IS NULL OR j.salary_min >= CAST(:salaryMin AS INTEGER))
-          AND (:search IS NULL OR LOWER(j.title::text) LIKE LOWER(CONCAT('%', :search, '%')))
-        ORDER BY j.posted_at DESC
-        """,
+    SELECT * FROM jobs j
+    WHERE j.status = 'ACTIVE'
+      AND (:type IS NULL OR j.type = CAST(:type AS VARCHAR))
+      AND (:location IS NULL OR LOWER(CAST(j.location AS TEXT)) LIKE LOWER(CONCAT('%', :location, '%')))
+      AND (:salaryMin IS NULL OR j.salary_min >= CAST(:salaryMin AS INTEGER))
+      AND (:search IS NULL OR LOWER(CAST(j.title AS TEXT)) LIKE LOWER(CONCAT('%', :search, '%')))
+    ORDER BY j.posted_at DESC
+    """,
             countQuery = """
-        SELECT COUNT(*) FROM jobs j
-        WHERE j.status = 'ACTIVE'
-          AND (:type IS NULL OR j.type = CAST(:type AS VARCHAR))
-          AND (:location IS NULL OR LOWER(j.location::text) LIKE LOWER(CONCAT('%', :location, '%')))
-          AND (:salaryMin IS NULL OR j.salary_min >= CAST(:salaryMin AS INTEGER))
-          AND (:search IS NULL OR LOWER(j.title::text) LIKE LOWER(CONCAT('%', :search, '%')))
-        """,
+    SELECT COUNT(*) FROM jobs j
+    WHERE j.status = 'ACTIVE'
+      AND (:type IS NULL OR j.type = CAST(:type AS VARCHAR))
+      AND (:location IS NULL OR LOWER(CAST(j.location AS TEXT)) LIKE LOWER(CONCAT('%', :location, '%')))
+      AND (:salaryMin IS NULL OR j.salary_min >= CAST(:salaryMin AS INTEGER))
+      AND (:search IS NULL OR LOWER(CAST(j.title AS TEXT)) LIKE LOWER(CONCAT('%', :search, '%')))
+    """,
             nativeQuery = true)
     Page<Job> searchJobs(
             @Param("type") String type,
