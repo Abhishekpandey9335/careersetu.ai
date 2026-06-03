@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
 
 const navLinks = [
+  { label: 'Home', path: '/' },
   { label: 'Govt Exams', path: '/govt-exams' },
   { label: 'Private Jobs', path: '/private-jobs' },
   { label: 'Internships', path: '/internships' },
@@ -28,6 +29,11 @@ export default function Navbar() {
     if (searchVal.trim()) navigate(`/search?q=${encodeURIComponent(searchVal.trim())}`);
   };
 
+  const isActive = (path) => {
+    if (path === '/') return location.pathname === '/';
+    return location.pathname.startsWith(path);
+  };
+
   return (
     <nav className="navbar">
       <div className="navbar-inner">
@@ -44,7 +50,7 @@ export default function Navbar() {
             <Link
               key={link.path}
               to={link.path}
-              className={`nav-link ${location.pathname.startsWith(link.path) ? 'active' : ''}`}
+              className={`nav-link ${isActive(link.path) ? 'active' : ''}`}
             >
               {link.label}
             </Link>
