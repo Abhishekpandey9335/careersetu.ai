@@ -13,15 +13,22 @@ import java.util.List;
 @Repository
 public interface JobRepository extends JpaRepository<Job, Long> {
 
-    @Query("""
-        SELECT j FROM Job j
-        WHERE j.status = 'ACTIVE'
-          AND (:type IS NULL OR j.type = :type)
-          AND (:location IS NULL OR LOWER(j.location) LIKE LOWER(CONCAT('%', :location, '%')))
-          AND (:salaryMin IS NULL OR j.salaryMin >= :salaryMin)
-          AND (:search IS NULL OR LOWER(j.title) LIKE LOWER(CONCAT('%', :search, '%')))
-        ORDER BY j.postedAt DESC
-        """)
+    @Query(value = """
+    SELECT j FROM Job j
+    WHERE j.status = 'ACTIVE'
+      AND (:type IS NULL OR j.type = :type)
+      AND (:location IS NULL OR LOWER(j.location) LIKE LOWER(CONCAT('%', :location, '%')))
+      AND (:salaryMin IS NULL OR j.salaryMin >= :salaryMin)
+      AND (:search IS NULL OR LOWER(j.title) LIKE LOWER(CONCAT('%', :search, '%')))
+    """,
+            countQuery = """
+    SELECT COUNT(j) FROM Job j
+    WHERE j.status = 'ACTIVE'
+      AND (:type IS NULL OR j.type = :type)
+      AND (:location IS NULL OR LOWER(j.location) LIKE LOWER(CONCAT('%', :location, '%')))
+      AND (:salaryMin IS NULL OR j.salaryMin >= :salaryMin)
+      AND (:search IS NULL OR LOWER(j.title) LIKE LOWER(CONCAT('%', :search, '%')))
+    """)
     Page<Job> searchJobs(
             @Param("type") Job.JobType type,
             @Param("location") String location,
