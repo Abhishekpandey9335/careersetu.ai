@@ -53,15 +53,16 @@ export default function App() {
           <Route path="/roadmap/:slug" element={<Layout><Roadmaps /></Layout>} />
           <Route path="/eligibility-checker" element={<Layout><EligibilityChecker /></Layout>} />
           <Route path="/company-explorer" element={<Layout><CompanyExplorer /></Layout>} />
+          <Route path="/companies" element={<Layout><CompanyExplorer /></Layout>} />
           <Route path="/company/:slug" element={<Layout><CompanyDetail /></Layout>} />
           <Route path="/salary-explorer" element={<Layout><SalaryExplorer /></Layout>} />
           <Route path="/resources" element={<Layout><Resources /></Layout>} />
           <Route path="/premium" element={<Layout><Premium /></Layout>} />
 
-          {/* AI Advisor — available to all, but requires login to chat */}
+          {/* AI Advisor */}
           <Route path="/ai-advisor" element={<Layout><AIAdvisor /></Layout>} />
 
-          {/* Protected pages — require login */}
+          {/* Protected pages */}
           <Route
             path="/dashboard"
             element={
