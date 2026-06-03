@@ -6,6 +6,7 @@ import './Premium.css';
 
 const UPI_ID = 'abhishekpandey29632@oksbi';
 const UPI_NAME = 'Abhishek Pandey';
+const API_URL = import.meta.env.VITE_API_URL || 'https://careersetu-ai-2.onrender.com/api';
 
 const plans = [
   {
@@ -77,9 +78,10 @@ const plans = [
   },
 ];
 
-function UPIModal({ plan, user, onClose, onSuccess }) {
+function UPIModal({ plan, onClose, onSuccess }) {
   const [copied, setCopied] = useState(false);
   const [txnId, setTxnId] = useState('');
+  const [screenshot, setScreenshot] = useState(null);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
 
@@ -91,29 +93,54 @@ function UPIModal({ plan, user, onClose, onSuccess }) {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleConfirm = () => {
+  const handleScreenshot = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => setScreenshot(reader.result);
+    reader.readAsDataURL(file);
+  };
+
+  const handleConfirm = async () => {
     if (!txnId.trim() || txnId.trim().length < 6) {
       setError('Please enter a valid UPI Transaction ID (min 6 characters).');
       return;
     }
     setSubmitted(true);
-    setTimeout(() => onSuccess(), 1500);
-  };
+    setError('');
 
-  const openUPI = () => {
-    window.location.href = upiLink;
+    try {
+      const res = await fetch(`${API_URL}/subscriptions/upi-request`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify({
+          plan: plan.id,
+          transactionId: txnId.trim(),
+          screenshotUrl: screenshot || '',
+        }),
+      });
+
+      if (!res.ok) throw new Error('Failed');
+      onSuccess();
+    } catch {
+      setError('Something went wrong. Please try again or contact support.');
+      setSubmitted(false);
+    }
   };
 
   return (
     <div style={{
       position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
       zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center',
-      padding: 20,
+      padding: 20, overflowY: 'auto',
     }}>
       <div style={{
         background: '#fff', borderRadius: 20, padding: 32,
         maxWidth: 440, width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
-        position: 'relative',
+        position: 'relative', margin: 'auto',
       }}>
         <button onClick={onClose} style={{
           position: 'absolute', top: 16, right: 16,
@@ -128,6 +155,7 @@ function UPIModal({ plan, user, onClose, onSuccess }) {
           </p>
         </div>
 
+        {/* UPI ID box */}
         <div style={{
           background: '#f0f4ff', border: '2px dashed #1a56db',
           borderRadius: 12, padding: '16px 20px', marginBottom: 16, textAlign: 'center',
@@ -139,26 +167,29 @@ function UPIModal({ plan, user, onClose, onSuccess }) {
           </button>
         </div>
 
+        {/* Open UPI app */}
         <button
-          onClick={openUPI}
+          onClick={() => { window.location.href = upiLink; }}
           className="btn btn-primary w-full"
           style={{ justifyContent: 'center', marginBottom: 20 }}
         >
           📱 Open UPI App to Pay
         </button>
 
+        {/* Steps */}
         <div style={{
           background: '#fffbeb', border: '1px solid #fde68a',
-          borderRadius: 10, padding: '12px 16px', marginBottom: 20, fontSize: 13,
-          color: '#92400e', lineHeight: 1.6,
+          borderRadius: 10, padding: '12px 16px', marginBottom: 20,
+          fontSize: 13, color: '#92400e', lineHeight: 1.6,
         }}>
           <strong>Steps:</strong><br />
           1. Copy UPI ID or click "Open UPI App"<br />
           2. Pay <strong>{plan.price}</strong> to <strong>{UPI_ID}</strong><br />
           3. Copy the Transaction ID from your UPI app<br />
-          4. Paste it below and confirm
+          4. Upload screenshot (optional) & paste Transaction ID below
         </div>
 
+        {/* Transaction ID */}
         <div style={{ marginBottom: 16 }}>
           <label style={{ fontSize: 13, fontWeight: 600, marginBottom: 6, display: 'block' }}>
             UPI Transaction ID *
@@ -170,8 +201,41 @@ function UPIModal({ plan, user, onClose, onSuccess }) {
             onChange={e => { setTxnId(e.target.value); setError(''); }}
             style={{ fontSize: 15 }}
           />
-          {error && <p style={{ color: '#e02424', fontSize: 12, marginTop: 4 }}>{error}</p>}
         </div>
+
+        {/* Screenshot upload */}
+        <div style={{ marginBottom: 20 }}>
+          <label style={{ fontSize: 13, fontWeight: 600, marginBottom: 6, display: 'block' }}>
+            Payment Screenshot (Optional)
+          </label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleScreenshot}
+            style={{
+              display: 'block', width: '100%', padding: '8px 12px',
+              border: '1px solid var(--border)', borderRadius: 8,
+              fontSize: 13, cursor: 'pointer',
+            }}
+          />
+          {screenshot && (
+            <div style={{ marginTop: 8, textAlign: 'center' }}>
+              <img src={screenshot} alt="screenshot" style={{
+                maxWidth: '100%', maxHeight: 120, borderRadius: 8,
+                border: '1px solid var(--border)',
+              }} />
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>
+                ✅ Screenshot attached
+              </div>
+            </div>
+          )}
+        </div>
+
+        {error && (
+          <p style={{ color: '#e02424', fontSize: 13, marginBottom: 12, textAlign: 'center' }}>
+            {error}
+          </p>
+        )}
 
         <button
           className="btn btn-primary w-full"
@@ -179,7 +243,7 @@ function UPIModal({ plan, user, onClose, onSuccess }) {
           onClick={handleConfirm}
           disabled={submitted}
         >
-          {submitted ? '✅ Verifying...' : '✅ Confirm Payment'}
+          {submitted ? '⏳ Submitting...' : '✅ Confirm Payment'}
         </button>
 
         <p style={{ fontSize: 11, color: 'var(--text-muted)', textAlign: 'center', marginTop: 12 }}>
@@ -192,7 +256,7 @@ function UPIModal({ plan, user, onClose, onSuccess }) {
 }
 
 export default function Premium() {
-  const { isLoggedIn, user, updateUser } = useAuth();
+  const { isLoggedIn, user } = useAuth();
   const navigate = useNavigate();
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
@@ -212,11 +276,10 @@ export default function Premium() {
       <div className="premium-page">
         <div style={{ textAlign: 'center', padding: '80px 20px' }}>
           <div style={{ fontSize: 64, marginBottom: 20 }}>🎉</div>
-          <h1 style={{ fontSize: 28, fontWeight: 800, marginBottom: 12 }}>
-            Payment Received!
-          </h1>
-          <p style={{ color: 'var(--text-muted)', marginBottom: 8, maxWidth: 480, margin: '0 auto 16px' }}>
-            Thank you for subscribing to CareerSetu Premium! Your account will be activated within <strong>2–4 hours</strong> after payment verification.
+          <h1 style={{ fontSize: 28, fontWeight: 800, marginBottom: 12 }}>Payment Received!</h1>
+          <p style={{ color: 'var(--text-muted)', maxWidth: 480, margin: '0 auto 16px' }}>
+            Thank you for subscribing to CareerSetu Premium! Your account will be activated within{' '}
+            <strong>2–4 hours</strong> after payment verification.
           </p>
           <p style={{ color: 'var(--text-muted)', fontSize: 13, marginBottom: 28 }}>
             For any issues contact: abhishekpandit08939@gmail.com
