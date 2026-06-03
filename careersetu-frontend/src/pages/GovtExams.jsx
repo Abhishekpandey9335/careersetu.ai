@@ -15,7 +15,6 @@ const categoryIcons = {
 };
 
 function ExamCard({ exam }) {
-  const isActive = exam.status === 'ACTIVE';
   const formatSal = (v) =>
     v >= 100000 ? `₹${(v / 100000).toFixed(0)}L` : `₹${(v / 1000).toFixed(0)}K`;
 
@@ -27,9 +26,7 @@ function ExamCard({ exam }) {
           <h3 className="elc-name">{exam.name}</h3>
           <div className="elc-body">{exam.conductingBody}</div>
         </div>
-        <span className={`badge ${isActive ? 'badge-success' : 'badge-yellow'}`}>
-          {exam.status}
-        </span>
+        <span className={`badge badge-yellow`}>{exam.status}</span>
       </div>
       <div className="elc-details">
         <div className="elc-detail-item">
@@ -67,7 +64,6 @@ export default function GovtExams() {
   const [error, setError] = useState(null);
   const [activeCategory, setActiveCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState('createdAt');
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [upcomingExams, setUpcomingExams] = useState([]);
@@ -79,7 +75,6 @@ export default function GovtExams() {
       const params = {
         page,
         size: 20,
-        sortBy,
         ...(activeCategory !== 'All' && { category: activeCategory }),
         ...(searchQuery && { search: searchQuery }),
       };
@@ -91,21 +86,18 @@ export default function GovtExams() {
     } finally {
       setLoading(false);
     }
-  }, [activeCategory, searchQuery, sortBy, page]);
+  }, [activeCategory, searchQuery, page]);
 
-  useEffect(() => {
-    fetchExams();
-  }, [fetchExams]);
+  useEffect(() => { fetchExams(); }, [fetchExams]);
 
   useEffect(() => {
     examService.getUpcoming(30).then((res) => setUpcomingExams(res.data || [])).catch(() => {});
   }, []);
 
-  // Debounce search
   useEffect(() => {
-    const t = setTimeout(() => { setPage(0); fetchExams(); }, 400);
+    const t = setTimeout(() => setPage(0), 400);
     return () => clearTimeout(t);
-  }, [searchQuery]); // eslint-disable-line
+  }, [searchQuery]);
 
   return (
     <div className="govt-exams-page">
@@ -117,9 +109,7 @@ export default function GovtExams() {
                 <Link to="/">Home</Link> <ChevronRight size={12} /> <span>Govt Exams</span>
               </div>
               <h1 className="page-title">Government Job Exams 2024</h1>
-              <p className="page-subtitle">
-                Find all government job notifications, exam details, eligibility, salary &amp; more
-              </p>
+              <p className="page-subtitle">Find all government job notifications, exam details, eligibility, salary &amp; more</p>
               <div className="page-stats">
                 <span>📋 {exams.length > 0 ? `${exams.length}+` : '...'} Active Notifications</span>
                 <span>👥 60M+ Aspirants</span>
@@ -133,7 +123,6 @@ export default function GovtExams() {
       <div className="container" style={{ padding: '28px 20px' }}>
         <div className="page-with-sidebar">
           <div>
-            {/* Search & Sort */}
             <div className="search-sort-bar card-flat">
               <div className="search-input-wrap">
                 <Search size={16} className="search-bar-icon" />
@@ -146,19 +135,12 @@ export default function GovtExams() {
               </div>
               <div className="sort-wrap">
                 <SlidersHorizontal size={15} />
-                <select
-                  className="input select sort-select"
-                  value={sortBy}
-                  onChange={(e) => { setSortBy(e.target.value); setPage(0); }}
-                >
-                  <option value="createdAt">Sort by Latest</option>
-                  <option value="formEnd">Sort by Last Date</option>
-                  <option value="vacancy">Sort by Vacancy</option>
+                <select className="input select sort-select" onChange={(e) => setPage(0)}>
+                  <option value="">Sort by Latest</option>
                 </select>
               </div>
             </div>
 
-            {/* Category filter */}
             <div className="category-filter-bar">
               {examCategories.map((cat) => (
                 <button
@@ -171,7 +153,6 @@ export default function GovtExams() {
               ))}
             </div>
 
-            {/* Results */}
             {error && (
               <div className="error-state">
                 <p>⚠️ {error}</p>
@@ -180,10 +161,7 @@ export default function GovtExams() {
             )}
 
             {loading ? (
-              <div className="loading-state">
-                <div className="spinner" />
-                <p>Loading exams...</p>
-              </div>
+              <div className="loading-state"><div className="spinner" /><p>Loading exams...</p></div>
             ) : (
               <>
                 <div className="results-count">
@@ -192,43 +170,23 @@ export default function GovtExams() {
                 </div>
                 <div className="exam-list">
                   {exams.length === 0 ? (
-                    <div className="empty-state">
-                      <div className="empty-icon">🔍</div>
-                      <h3>No exams found</h3>
-                      <p>Try different search terms or categories</p>
-                    </div>
+                    <div className="empty-state"><div className="empty-icon">🔍</div><h3>No exams found</h3><p>Try different search terms or categories</p></div>
                   ) : (
                     exams.map((exam) => <ExamCard key={exam.id} exam={exam} />)
                   )}
                 </div>
 
-                {/* Pagination */}
                 {totalPages > 1 && (
-                  <div className="pagination" style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 24 }}>
-                    <button
-                      className="btn btn-outline btn-sm"
-                      disabled={page === 0}
-                      onClick={() => setPage((p) => p - 1)}
-                    >
-                      ← Prev
-                    </button>
-                    <span style={{ padding: '6px 12px', fontSize: 13 }}>
-                      Page {page + 1} / {totalPages}
-                    </span>
-                    <button
-                      className="btn btn-outline btn-sm"
-                      disabled={page >= totalPages - 1}
-                      onClick={() => setPage((p) => p + 1)}
-                    >
-                      Next →
-                    </button>
+                  <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 24 }}>
+                    <button className="btn btn-outline btn-sm" disabled={page === 0} onClick={() => setPage((p) => p - 1)}>← Prev</button>
+                    <span style={{ padding: '6px 12px', fontSize: 13 }}>Page {page + 1} / {totalPages}</span>
+                    <button className="btn btn-outline btn-sm" disabled={page >= totalPages - 1} onClick={() => setPage((p) => p + 1)}>Next →</button>
                   </div>
                 )}
               </>
             )}
           </div>
 
-          {/* Sidebar */}
           <div>
             <div className="sidebar-widget card-flat">
               <h3 className="sw-title">📅 Upcoming Deadlines</h3>
@@ -239,7 +197,6 @@ export default function GovtExams() {
                 </div>
               ))}
             </div>
-
             <div className="sidebar-widget card-flat" style={{ marginTop: 16 }}>
               <h3 className="sw-title">✅ Quick Eligibility Check</h3>
               <div className="form-group">
@@ -251,13 +208,7 @@ export default function GovtExams() {
                   <option>Graduation</option>
                 </select>
               </div>
-              <Link
-                to="/eligibility-checker"
-                className="btn btn-primary w-full"
-                style={{ justifyContent: 'center' }}
-              >
-                Check Eligibility
-              </Link>
+              <Link to="/eligibility-checker" className="btn btn-primary w-full" style={{ justifyContent: 'center' }}>Check Eligibility</Link>
             </div>
           </div>
         </div>
