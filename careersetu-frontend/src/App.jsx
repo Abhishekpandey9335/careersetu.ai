@@ -20,6 +20,7 @@ import CompanyDetail from './pages/CompanyDetail';
 import SalaryExplorer from './pages/SalaryExplorer';
 import Resources from './pages/Resources';
 import Premium from './pages/Premium';
+import Admin from './pages/Admin';
 import { Login, Register } from './pages/Auth';
 import NotFound from './pages/NotFound';
 import AboutUs from './pages/AboutUs';
@@ -85,6 +86,16 @@ export default function App() {
                   <Dashboard />
                 </ProtectedRoute>
               </Layout>
+            }
+          />
+
+          {/* Admin panel — protected */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <Admin />
+              </ProtectedRoute>
             }
           />
 

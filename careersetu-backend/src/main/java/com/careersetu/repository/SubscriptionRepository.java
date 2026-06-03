@@ -11,5 +11,7 @@ import java.util.Optional;
 public interface SubscriptionRepository extends JpaRepository<Subscription, Long> {
     Optional<Subscription> findTopByUserIdAndStatusOrderByCreatedAtDesc(Long userId, Subscription.SubscriptionStatus status);
     List<Subscription> findByUserIdOrderByCreatedAtDesc(Long userId);
+    List<Subscription> findByStatus(Subscription.SubscriptionStatus status);
+    List<Subscription> findAllByOrderByCreatedAtDesc();
     long countByStatus(Subscription.SubscriptionStatus status);
 }

@@ -55,7 +55,7 @@ public class SubscriptionService {
         try {
             emailService.sendPremiumActivated(
                     user.getEmail(), user.getName(), plan.name(),
-                    "Pending verification — will activate within 2-4 hours"
+                    "Pending verification - will activate within 2-4 hours"
             );
         } catch (Exception ignored) {}
 
@@ -65,6 +65,50 @@ public class SubscriptionService {
         result.put("amount", amount);
         result.put("status", "PENDING");
         result.put("message", "Payment request submitted. Premium will be activated within 2-4 hours after verification.");
+        return result;
+    }
+
+    @Transactional
+    public Map<String, Object> approveSubscription(Long subscriptionId) {
+        Subscription sub = subscriptionRepository.findById(subscriptionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Subscription", subscriptionId));
+
+        LocalDateTime now = LocalDateTime.now();
+        int days = DURATION_DAYS.getOrDefault(sub.getPlan(), 30);
+
+        sub.setStatus(Subscription.SubscriptionStatus.ACTIVE);
+        sub.setStartDate(now);
+        sub.setEndDate(now.plusDays(days));
+        subscriptionRepository.save(sub);
+
+        try {
+            emailService.sendPremiumActivated(
+                    sub.getUser().getEmail(), sub.getUser().getName(),
+                    sub.getPlan().name(),
+                    "Valid until " + sub.getEndDate().toLocalDate()
+            );
+        } catch (Exception ignored) {}
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("id", sub.getId());
+        result.put("status", "ACTIVE");
+        result.put("endDate", sub.getEndDate());
+        result.put("message", "Subscription approved successfully");
+        return result;
+    }
+
+    @Transactional
+    public Map<String, Object> rejectSubscription(Long subscriptionId) {
+        Subscription sub = subscriptionRepository.findById(subscriptionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Subscription", subscriptionId));
+
+        sub.setStatus(Subscription.SubscriptionStatus.FAILED);
+        subscriptionRepository.save(sub);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("id", sub.getId());
+        result.put("status", "FAILED");
+        result.put("message", "Subscription rejected");
         return result;
     }
 

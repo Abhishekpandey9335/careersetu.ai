@@ -3,16 +3,17 @@ package com.careersetu.controller;
 import com.careersetu.entity.Subscription;
 import com.careersetu.exception.ApiResponse;
 import com.careersetu.repository.*;
+import com.careersetu.service.SubscriptionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -28,17 +29,47 @@ public class AdminController {
     private final JobRepository jobRepository;
     private final StudyMaterialRepository studyMaterialRepository;
     private final SubscriptionRepository subscriptionRepository;
+    private final SubscriptionService subscriptionService;
 
     @GetMapping("/stats")
     @Operation(summary = "Platform-wide stats")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getStats() {
-        return ResponseEntity.ok(ApiResponse.success(Map.of(
-                "totalUsers",          userRepository.count(),
-                "totalExams",          examRepository.count(),
-                "totalJobs",           jobRepository.count(),
-                "totalStudyMaterials", studyMaterialRepository.count(),
-                "totalSubscriptions",  subscriptionRepository.count(),
-                "activeSubscriptions", subscriptionRepository.countByStatus(Subscription.SubscriptionStatus.ACTIVE)
-        )));
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("totalUsers",           userRepository.count());
+        stats.put("totalExams",           examRepository.count());
+        stats.put("totalJobs",            jobRepository.count());
+        stats.put("totalStudyMaterials",  studyMaterialRepository.count());
+        stats.put("totalSubscriptions",   subscriptionRepository.count());
+        stats.put("activeSubscriptions",  subscriptionRepository.countByStatus(Subscription.SubscriptionStatus.ACTIVE));
+        stats.put("pendingSubscriptions", subscriptionRepository.countByStatus(Subscription.SubscriptionStatus.PENDING));
+        return ResponseEntity.ok(ApiResponse.success(stats));
+    }
+
+    @GetMapping("/subscriptions")
+    @Operation(summary = "Get all subscriptions")
+    public ResponseEntity<ApiResponse<List<Subscription>>> getAllSubscriptions(
+            @RequestParam(required = false) String status) {
+        List<Subscription> subs;
+        if (status != null) {
+            subs = subscriptionRepository.findByStatus(
+                    Subscription.SubscriptionStatus.valueOf(status.toUpperCase()));
+        } else {
+            subs = subscriptionRepository.findAllByOrderByCreatedAtDesc();
+        }
+        return ResponseEntity.ok(ApiResponse.success(subs));
+    }
+
+    @PutMapping("/subscriptions/{id}/approve")
+    @Operation(summary = "Approve a subscription")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> approveSubscription(
+            @PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success(subscriptionService.approveSubscription(id)));
+    }
+
+    @PutMapping("/subscriptions/{id}/reject")
+    @Operation(summary = "Reject a subscription")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> rejectSubscription(
+            @PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success(subscriptionService.rejectSubscription(id)));
     }
 }
