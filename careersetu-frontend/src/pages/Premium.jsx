@@ -100,6 +100,10 @@ function UPIModal({ plan, user, onClose, onSuccess }) {
     setTimeout(() => onSuccess(), 1500);
   };
 
+  const openUPI = () => {
+    window.location.href = upiLink;
+  };
+
   return (
     <div style={{
       position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
@@ -124,7 +128,6 @@ function UPIModal({ plan, user, onClose, onSuccess }) {
           </p>
         </div>
 
-        {/* UPI ID */}
         <div style={{
           background: '#f0f4ff', border: '2px dashed #1a56db',
           borderRadius: 12, padding: '16px 20px', marginBottom: 16, textAlign: 'center',
@@ -136,14 +139,13 @@ function UPIModal({ plan, user, onClose, onSuccess }) {
           </button>
         </div>
 
-        {/* Pay via app button */}
-
-          href={upiLink}
+        <button
+          onClick={openUPI}
           className="btn btn-primary w-full"
           style={{ justifyContent: 'center', marginBottom: 20 }}
         >
           📱 Open UPI App to Pay
-        </a>
+        </button>
 
         <div style={{
           background: '#fffbeb', border: '1px solid #fde68a',
@@ -157,7 +159,6 @@ function UPIModal({ plan, user, onClose, onSuccess }) {
           4. Paste it below and confirm
         </div>
 
-        {/* Transaction ID input */}
         <div style={{ marginBottom: 16 }}>
           <label style={{ fontSize: 13, fontWeight: 600, marginBottom: 6, display: 'block' }}>
             UPI Transaction ID *
@@ -312,7 +313,6 @@ export default function Premium() {
           ))}
         </div>
 
-        {/* UPI Info */}
         <div style={{
           marginTop: 40, background: '#f0f4ff', borderRadius: 16,
           padding: 28, textAlign: 'center', maxWidth: 500, margin: '40px auto 0',
@@ -325,7 +325,6 @@ export default function Premium() {
           </p>
         </div>
 
-        {/* FAQ */}
         <div style={{ marginTop: 48, maxWidth: 700, margin: '48px auto 0' }}>
           <h2 className="section-title" style={{ textAlign: 'center', marginBottom: 28 }}>
             Frequently Asked Questions
