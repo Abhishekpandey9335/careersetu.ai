@@ -14,10 +14,11 @@ export default function Admin() {
   const [actionLoading, setActionLoading] = useState(null);
   const [message, setMessage] = useState('');
 
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('accessToken');
 
   useEffect(() => {
     if (!user) { navigate('/login'); return; }
+    if (user.role !== 'ADMIN') { navigate('/'); return; }
     fetchStats();
     fetchSubscriptions(filter);
   }, []);
