@@ -26,7 +26,7 @@ export default function Footer() {
                 <div><small>GET IT ON</small><br /><strong>Google Play</strong></div>
               </a>
               <a href="#" className="app-badge">
-                <span>🍎</span>
+                <span>🎁</span>
                 <div><small>Download on the</small><br /><strong>App Store</strong></div>
               </a>
             </div>
@@ -65,7 +65,7 @@ export default function Footer() {
 
         <div className="footer-bottom">
           <p>© 2026 CareerSetu. All Rights Reserved.</p>
-          <p>Design and devloped by Abhishek Pandey <br> contact for creating website 9335203841 </p>
+          <p>Design and developed by Abhishek Pandey <br /> contact for creating website 9335203841</p>
         </div>
       </div>
     </footer>
