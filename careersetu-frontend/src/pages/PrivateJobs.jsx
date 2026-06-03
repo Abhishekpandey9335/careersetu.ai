@@ -42,17 +42,19 @@ function JobListCard({ job }) {
           <span><Clock size={12} /> Recently posted</span>
         </div>
         <div className="jlc-skills">
-          {job.skillsRequired?.map((s) => (
-            <span key={s} className="tag">{s}</span>
-          ))}
+          {Array.isArray(job.skillsRequired)
+            ? job.skillsRequired.map((s) => <span key={s} className="tag">{s}</span>)
+            : typeof job.skillsRequired === 'string'
+              ? JSON.parse(job.skillsRequired).map((s) => <span key={s} className="tag">{s}</span>)
+              : null}
         </div>
       </div>
       <div className="jlc-right">
         <div className="jlc-salary">
           {formatSalary(job.salaryMin, job.salaryMax)}
         </div>
-        <a
-          href={job.applyUrl || '#'}
+
+          href={job.applyLink || '#'}
           target="_blank"
           rel="noopener noreferrer"
           className="btn btn-primary btn-sm"
@@ -66,7 +68,7 @@ function JobListCard({ job }) {
 }
 
 export default function PrivateJobs() {
-  const [activeTab, setActiveTab] = useState('FULL_TIME');
+  const [activeTab, setActiveTab] = useState('PRIVATE');
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -97,7 +99,6 @@ export default function PrivateJobs() {
     fetchJobs();
   }, [fetchJobs]);
 
-  // Debounce
   useEffect(() => {
     const t = setTimeout(() => { setPage(0); }, 400);
     return () => clearTimeout(t);
@@ -128,8 +129,8 @@ export default function PrivateJobs() {
       <div className="pj-tabs-bar">
         <div className="container" style={{ display: 'flex', gap: 0 }}>
           <button
-            className={`pj-tab ${activeTab === 'FULL_TIME' ? 'active' : ''}`}
-            onClick={() => { setActiveTab('FULL_TIME'); setPage(0); }}
+            className={`pj-tab ${activeTab === 'PRIVATE' ? 'active' : ''}`}
+            onClick={() => { setActiveTab('PRIVATE'); setPage(0); }}
           >
             💼 Full-time Jobs
           </button>
@@ -196,7 +197,6 @@ export default function PrivateJobs() {
             )}
           </div>
 
-          {/* Sidebar */}
           <div>
             <div className="sidebar-widget card-flat">
               <h3 className="sw-title">🔥 Trending Skills</h3>
