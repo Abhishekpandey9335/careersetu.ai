@@ -28,8 +28,8 @@ public class Subscription {
     private LocalDateTime startDate;
     private LocalDateTime endDate;
 
-    private String razorpayPaymentId;
-    private String razorpayOrderId;
+    private String upiTransactionId;
+    private String screenshotUrl;
 
     @Enumerated(EnumType.STRING)
     @Builder.Default
