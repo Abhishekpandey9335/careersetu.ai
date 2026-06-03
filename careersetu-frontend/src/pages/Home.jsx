@@ -87,7 +87,9 @@ function JobCard({ job }) {
       <div className="job-skills">
         {job.skillsRequired?.slice(0, 3).map(s => <span key={s} className="tag">{s}</span>)}
       </div>
-      <button className="btn btn-secondary btn-sm apply-btn">Apply Now <ArrowRight size={13} /></button>
+      <a href={job.applyLink || '#'} target="_blank" rel="noopener noreferrer" className="btn btn-primary btn-sm apply-btn">
+        Apply Now <ArrowRight size={13} />
+      </a>
     </div>
   );
 }
