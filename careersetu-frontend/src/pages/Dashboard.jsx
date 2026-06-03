@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, BookOpen, Briefcase, Bell, Target,
-  CheckCircle, Flame, Trophy, ChevronRight, Sparkles,
+  CheckCircle, Flame, Trophy, ChevronRight, Sparkles, Crown,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { dashboardService, notificationService } from '../services/services';
@@ -14,6 +14,7 @@ const sideNav = [
   { icon: <BookOpen size={18} />, label: 'Study Progress', id: 'progress' },
   { icon: <Briefcase size={18} />, label: 'Applications', id: 'applications' },
   { icon: <Bell size={18} />, label: 'Notifications', id: 'notifications' },
+  { icon: <Crown size={18} />, label: 'Premium & Receipts', id: 'premium' },
 ];
 
 const statusConfig = {
@@ -24,6 +25,111 @@ const statusConfig = {
 };
 
 const notifIcons = { FORM: '📋', RESULT: '📊', ADMIT: '🪪', ALERT: '🔔', GENERAL: '🔔' };
+
+const API_URL = import.meta.env.VITE_API_URL || 'https://careersetu-ai-2.onrender.com/api';
+
+function PremiumReceipts() {
+  const [history, setHistory] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`${API_URL}/subscriptions/history`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+    })
+      .then(r => r.json())
+      .then(d => setHistory(d.data || []))
+      .catch(() => setHistory([]))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return <div style={{ padding: 40, textAlign: 'center' }}>Loading...</div>;
+
+  if (!history.length) return (
+    <div className="empty-state">
+      <div className="empty-icon">👑</div>
+      <h3>No transactions yet</h3>
+      <p style={{ marginBottom: 16, color: 'var(--text-muted)' }}>
+        Upgrade to Premium to unlock all features.
+      </p>
+      <Link to="/premium" className="btn btn-primary btn-sm">Get Premium →</Link>
+    </div>
+  );
+
+  return (
+    <div>
+      {history.map((sub) => (
+        <div key={sub.id} className="card" style={{ marginBottom: 16, padding: 24 }}>
+          <div style={{
+            display: 'flex', justifyContent: 'space-between',
+            alignItems: 'flex-start', flexWrap: 'wrap', gap: 12
+          }}>
+            <div>
+              <div style={{ fontSize: 18, fontWeight: 800, marginBottom: 4 }}>
+                👑 CareerSetu {sub.plan} Plan
+              </div>
+              <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 8 }}>
+                Receipt #{sub.id} • {new Date(sub.createdAt).toLocaleDateString('en-IN', {
+                  day: 'numeric', month: 'long', year: 'numeric'
+                })}
+              </div>
+              <div style={{ fontSize: 14, marginBottom: 4 }}>
+                💰 Amount: <strong>₹{sub.amount}</strong>
+              </div>
+              <div style={{ fontSize: 14, marginBottom: 4 }}>
+                🔖 UPI Transaction ID:{' '}
+                <strong style={{ fontFamily: 'monospace' }}>
+                  {sub.upiTransactionId || '—'}
+                </strong>
+              </div>
+              {sub.startDate && (
+                <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+                  Valid: {new Date(sub.startDate).toLocaleDateString('en-IN')} →{' '}
+                  {new Date(sub.endDate).toLocaleDateString('en-IN')}
+                </div>
+              )}
+            </div>
+            <div>
+              <span className="badge" style={{
+                fontSize: 13, padding: '6px 14px',
+                background:
+                  sub.status === 'ACTIVE' ? '#def7ec' :
+                  sub.status === 'PENDING' ? '#fffbeb' : '#fdf2f2',
+                color:
+                  sub.status === 'ACTIVE' ? '#0e9f6e' :
+                  sub.status === 'PENDING' ? '#f59e0b' : '#e02424',
+              }}>
+                {sub.status === 'ACTIVE' ? '✅ Active' :
+                 sub.status === 'PENDING' ? '⏳ Pending Verification' :
+                 sub.status}
+              </span>
+            </div>
+          </div>
+
+          {sub.status === 'PENDING' && (
+            <div style={{
+              marginTop: 12, padding: '10px 14px',
+              background: '#fffbeb', borderRadius: 8,
+              fontSize: 13, color: '#92400e'
+            }}>
+              ⏳ Payment verification in progress. Premium will be activated within 2–4 hours.
+              Need help? Email: <strong>abhishekpandit08939@gmail.com</strong>
+            </div>
+          )}
+
+          {sub.status === 'ACTIVE' && (
+            <div style={{
+              marginTop: 12, padding: '10px 14px',
+              background: '#def7ec', borderRadius: 8,
+              fontSize: 13, color: '#0e9f6e'
+            }}>
+              ✅ Premium is active! Enjoy all CareerSetu Premium features.
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function Dashboard() {
   const { isLoggedIn, user } = useAuth();
@@ -76,12 +182,12 @@ export default function Dashboard() {
     );
   }
 
-  const profile        = dashboard?.profile || {};
-  const applications   = dashboard?.applications || [];
-  const appStats       = dashboard?.applicationStats || {};
-  const notifications  = dashboard?.recentNotifications || [];
-  const upcomingExams  = dashboard?.upcomingDeadlines || [];
-  const bookmarks      = dashboard?.bookmarks || {};
+  const profile       = dashboard?.profile || {};
+  const applications  = dashboard?.applications || [];
+  const appStats      = dashboard?.applicationStats || {};
+  const notifications = dashboard?.recentNotifications || [];
+  const upcomingExams = dashboard?.upcomingDeadlines || [];
+  const bookmarks     = dashboard?.bookmarks || {};
 
   const displayName = profile.name || user?.name || 'Student';
 
@@ -148,7 +254,6 @@ export default function Dashboard() {
             {/* ── OVERVIEW ── */}
             {activeTab === 'overview' && (
               <div className="fade-in">
-                {/* AI Daily task */}
                 <div className="ai-daily-task card">
                   <div className="adt-left">
                     <div className="adt-icon"><Sparkles size={20} /></div>
@@ -167,7 +272,6 @@ export default function Dashboard() {
                   <Link to="/ai-advisor" className="btn btn-primary btn-sm">Ask AI →</Link>
                 </div>
 
-                {/* Stats grid */}
                 <div className="dashboard-stats-grid">
                   {[
                     { label: 'Exams Saved', val: bookmarks?.exams?.length || 0, icon: '📋', color: 'var(--primary)' },
@@ -184,7 +288,6 @@ export default function Dashboard() {
                 </div>
 
                 <div className="dashboard-two-col">
-                  {/* Saved Exams */}
                   <div>
                     <div className="section-header">
                       <h2 className="section-title">📋 Saved Exams</h2>
@@ -217,7 +320,6 @@ export default function Dashboard() {
                     </div>
                   </div>
 
-                  {/* Upcoming deadlines */}
                   <div>
                     <div className="section-header">
                       <h2 className="section-title">📅 Upcoming Deadlines</h2>
@@ -315,9 +417,7 @@ export default function Dashboard() {
                         onClick={() => !n.read && markRead(n.id)}
                         style={{ cursor: !n.read ? 'pointer' : 'default' }}
                       >
-                        <div className="notif-icon">
-                          {notifIcons[n.type] || '🔔'}
-                        </div>
+                        <div className="notif-icon">{notifIcons[n.type] || '🔔'}</div>
                         <div className="notif-content">
                           <div className="notif-title">{n.title}</div>
                           <div className="notif-msg">{n.message}</div>
@@ -366,6 +466,15 @@ export default function Dashboard() {
                 </div>
               </div>
             )}
+
+            {/* ── PREMIUM RECEIPTS ── */}
+            {activeTab === 'premium' && (
+              <div className="fade-in">
+                <h2 className="section-title" style={{ marginBottom: 20 }}>👑 Premium & Transaction History</h2>
+                <PremiumReceipts />
+              </div>
+            )}
+
           </div>
         </div>
       </div>
