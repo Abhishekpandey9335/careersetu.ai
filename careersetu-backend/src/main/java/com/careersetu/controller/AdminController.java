@@ -1,6 +1,7 @@
 package com.careersetu.controller;
 
 import com.careersetu.entity.Subscription;
+import com.careersetu.entity.User;
 import com.careersetu.exception.ApiResponse;
 import com.careersetu.repository.*;
 import com.careersetu.service.SubscriptionService;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/admin")
@@ -43,6 +45,24 @@ public class AdminController {
         stats.put("activeSubscriptions",  subscriptionRepository.countByStatus(Subscription.SubscriptionStatus.ACTIVE));
         stats.put("pendingSubscriptions", subscriptionRepository.countByStatus(Subscription.SubscriptionStatus.PENDING));
         return ResponseEntity.ok(ApiResponse.success(stats));
+    }
+
+    @GetMapping("/users")
+    @Operation(summary = "Get all users")
+    public ResponseEntity<ApiResponse<List<Map<String, Object>>>> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        List<Map<String, Object>> result = users.stream().map(u -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", u.getId());
+            map.put("name", u.getName());
+            map.put("email", u.getEmail());
+            map.put("role", u.getRole());
+            map.put("isPremium", u.isPremium());
+            map.put("phone", u.getPhone());
+            map.put("createdAt", u.getCreatedAt());
+            return map;
+        }).collect(Collectors.toList());
+        return ResponseEntity.ok(ApiResponse.success(result));
     }
 
     @GetMapping("/subscriptions")
