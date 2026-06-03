@@ -18,9 +18,10 @@
     <description>India's AI-Powered Career Operating System — Spring Boot + PostgreSQL + JWT</description>
 
     <properties>
-        <java.version>17</java.version>
-        <jjwt.version>0.11.5</jjwt.version>
-    </properties>
+    <java.version>17</java.version>
+    <jjwt.version>0.11.5</jjwt.version>
+    <postgresql.version>42.7.3</postgresql.version>
+</properties>
 
     <dependencies>
         <!-- Spring Boot Core -->
@@ -49,7 +50,6 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.7.3</version>
             <scope>runtime</scope>
         </dependency>
 
