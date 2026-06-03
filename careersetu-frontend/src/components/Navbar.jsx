@@ -8,6 +8,7 @@ const navLinks = [
   { label: 'Govt Exams', path: '/govt-exams' },
   { label: 'Private Jobs', path: '/private-jobs' },
   { label: 'Internships', path: '/internships' },
+  { label: 'Companies', path: '/companies' },
   { label: 'Study Material', path: '/study-material' },
   { label: 'Roadmaps', path: '/roadmaps' },
   { label: 'Resources', path: '/resources' },
@@ -30,7 +31,6 @@ export default function Navbar() {
   return (
     <nav className="navbar">
       <div className="navbar-inner">
-        {/* Logo */}
         <Link to="/" className="navbar-logo">
           <div className="logo-icon">CS</div>
           <div className="logo-text">
@@ -39,7 +39,6 @@ export default function Navbar() {
           </div>
         </Link>
 
-        {/* Desktop nav links */}
         <div className="navbar-links">
           {navLinks.map(link => (
             <Link
@@ -57,9 +56,7 @@ export default function Navbar() {
           </Link>
         </div>
 
-        {/* Right side */}
         <div className="navbar-right">
-          {/* Search */}
           <div className={`search-wrap ${searchOpen ? 'open' : ''}`}>
             {searchOpen ? (
               <form onSubmit={handleSearch} className="search-form">
@@ -125,7 +122,6 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile menu */}
       {mobileOpen && (
         <div className="mobile-menu">
           <form onSubmit={handleSearch} className="mobile-search-form">
