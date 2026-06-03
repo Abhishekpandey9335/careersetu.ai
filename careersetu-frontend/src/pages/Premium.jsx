@@ -140,7 +140,7 @@ function UPIModal({ plan, user, onClose, onSuccess }) {
 
           href={upiLink}
           className="btn btn-primary w-full"
-          style={{ justifyContent: 'center', marginBottom: 20, display: 'flex' }}
+          style={{ justifyContent: 'center', marginBottom: 20 }}
         >
           📱 Open UPI App to Pay
         </a>
