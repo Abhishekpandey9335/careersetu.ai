@@ -22,6 +22,12 @@ import Resources from './pages/Resources';
 import Premium from './pages/Premium';
 import { Login, Register } from './pages/Auth';
 import NotFound from './pages/NotFound';
+import AboutUs from './pages/AboutUs';
+import ContactUs from './pages/ContactUs';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsConditions from './pages/TermsConditions';
+import RefundPolicy from './pages/RefundPolicy';
+import Careers from './pages/Careers';
 
 function Layout({ children }) {
   return (
@@ -61,6 +67,14 @@ export default function App() {
 
           {/* AI Advisor */}
           <Route path="/ai-advisor" element={<Layout><AIAdvisor /></Layout>} />
+
+          {/* Footer pages */}
+          <Route path="/about" element={<Layout><AboutUs /></Layout>} />
+          <Route path="/contact" element={<Layout><ContactUs /></Layout>} />
+          <Route path="/privacy" element={<Layout><PrivacyPolicy /></Layout>} />
+          <Route path="/terms" element={<Layout><TermsConditions /></Layout>} />
+          <Route path="/refund" element={<Layout><RefundPolicy /></Layout>} />
+          <Route path="/careers" element={<Layout><Careers /></Layout>} />
 
           {/* Protected pages */}
           <Route
