@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { CheckCircle, X, Sparkles, Crown, ChevronRight } from 'lucide-react';
+import { CheckCircle, X, Sparkles, Crown, Copy, Check } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { subscriptionService } from '../services/services';
 import './Premium.css';
 
-const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID || '';
+const UPI_ID = 'abhishekpandey29632@oksbi';
+const UPI_NAME = 'Abhishek Pandey';
 
 const plans = [
   {
@@ -33,6 +33,7 @@ const plans = [
     id: 'MONTHLY',
     name: 'Premium Monthly',
     price: '₹99',
+    amount: 99,
     period: '/month',
     color: 'var(--primary)',
     badge: 'Most Popular',
@@ -55,6 +56,7 @@ const plans = [
     id: 'YEARLY',
     name: 'Premium Yearly',
     price: '₹799',
+    amount: 799,
     period: '/year',
     color: 'var(--purple)',
     badge: 'Best Value — Save 33%',
@@ -75,86 +77,133 @@ const plans = [
   },
 ];
 
-/** Load Razorpay script once */
-function loadRazorpay() {
-  return new Promise((resolve) => {
-    if (window.Razorpay) { resolve(true); return; }
-    const script = document.createElement('script');
-    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-    script.onload = () => resolve(true);
-    script.onerror = () => resolve(false);
-    document.body.appendChild(script);
-  });
+function UPIModal({ plan, user, onClose, onSuccess }) {
+  const [copied, setCopied] = useState(false);
+  const [txnId, setTxnId] = useState('');
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState('');
+
+  const upiLink = `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&am=${plan.amount}&cu=INR&tn=${encodeURIComponent('CareerSetu ' + plan.name)}`;
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(UPI_ID);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleConfirm = () => {
+    if (!txnId.trim() || txnId.trim().length < 6) {
+      setError('Please enter a valid UPI Transaction ID (min 6 characters).');
+      return;
+    }
+    setSubmitted(true);
+    setTimeout(() => onSuccess(), 1500);
+  };
+
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
+      zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center',
+      padding: 20,
+    }}>
+      <div style={{
+        background: '#fff', borderRadius: 20, padding: 32,
+        maxWidth: 440, width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
+        position: 'relative',
+      }}>
+        <button onClick={onClose} style={{
+          position: 'absolute', top: 16, right: 16,
+          background: 'transparent', border: 'none', cursor: 'pointer', fontSize: 20,
+        }}>✕</button>
+
+        <div style={{ textAlign: 'center', marginBottom: 24 }}>
+          <div style={{ fontSize: 48, marginBottom: 8 }}>💳</div>
+          <h2 style={{ fontSize: 20, fontWeight: 800, marginBottom: 4 }}>Pay via UPI</h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>
+            {plan.name} — <strong style={{ color: plan.color }}>{plan.price}</strong>
+          </p>
+        </div>
+
+        {/* UPI ID */}
+        <div style={{
+          background: '#f0f4ff', border: '2px dashed #1a56db',
+          borderRadius: 12, padding: '16px 20px', marginBottom: 16, textAlign: 'center',
+        }}>
+          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 6 }}>UPI ID</div>
+          <div style={{ fontSize: 20, fontWeight: 800, color: '#1a56db', letterSpacing: 1 }}>{UPI_ID}</div>
+          <button onClick={handleCopy} className="btn btn-outline btn-sm" style={{ marginTop: 10 }}>
+            {copied ? <><Check size={13} /> Copied!</> : <><Copy size={13} /> Copy UPI ID</>}
+          </button>
+        </div>
+
+        {/* Pay via app button */}
+
+          href={upiLink}
+          className="btn btn-primary w-full"
+          style={{ justifyContent: 'center', marginBottom: 20, display: 'flex' }}
+        >
+          📱 Open UPI App to Pay
+        </a>
+
+        <div style={{
+          background: '#fffbeb', border: '1px solid #fde68a',
+          borderRadius: 10, padding: '12px 16px', marginBottom: 20, fontSize: 13,
+          color: '#92400e', lineHeight: 1.6,
+        }}>
+          <strong>Steps:</strong><br />
+          1. Copy UPI ID or click "Open UPI App"<br />
+          2. Pay <strong>{plan.price}</strong> to <strong>{UPI_ID}</strong><br />
+          3. Copy the Transaction ID from your UPI app<br />
+          4. Paste it below and confirm
+        </div>
+
+        {/* Transaction ID input */}
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ fontSize: 13, fontWeight: 600, marginBottom: 6, display: 'block' }}>
+            UPI Transaction ID *
+          </label>
+          <input
+            className="input"
+            placeholder="e.g. 123456789012"
+            value={txnId}
+            onChange={e => { setTxnId(e.target.value); setError(''); }}
+            style={{ fontSize: 15 }}
+          />
+          {error && <p style={{ color: '#e02424', fontSize: 12, marginTop: 4 }}>{error}</p>}
+        </div>
+
+        <button
+          className="btn btn-primary w-full"
+          style={{ justifyContent: 'center' }}
+          onClick={handleConfirm}
+          disabled={submitted}
+        >
+          {submitted ? '✅ Verifying...' : '✅ Confirm Payment'}
+        </button>
+
+        <p style={{ fontSize: 11, color: 'var(--text-muted)', textAlign: 'center', marginTop: 12 }}>
+          After verification, premium will be activated within 2–4 hours.<br />
+          Support: abhishekpandit08939@gmail.com
+        </p>
+      </div>
+    </div>
+  );
 }
 
 export default function Premium() {
   const { isLoggedIn, user, updateUser } = useAuth();
   const navigate = useNavigate();
-  const [processingPlan, setProcessingPlan] = useState(null);
-  const [paymentError, setPaymentError] = useState(null);
+  const [selectedPlan, setSelectedPlan] = useState(null);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
 
-  const handleSubscribe = async (planId) => {
+  const handleSubscribe = (plan) => {
     if (!isLoggedIn) { navigate('/login'); return; }
+    setSelectedPlan(plan);
+  };
 
-    setProcessingPlan(planId);
-    setPaymentError(null);
-
-    try {
-      // 1. Create Razorpay order on backend
-      const orderRes = await subscriptionService.createOrder(planId);
-      const order = orderRes.data;   // { orderId, amount, currency, keyId }
-
-      // 2. Load Razorpay SDK
-      const loaded = await loadRazorpay();
-      if (!loaded) throw new Error('Failed to load payment gateway. Check your internet connection.');
-
-      // 3. Open Razorpay checkout
-      await new Promise((resolve, reject) => {
-        const options = {
-          key: order.keyId || RAZORPAY_KEY_ID,
-          amount: order.amount,
-          currency: order.currency || 'INR',
-          name: 'CareerSetu',
-          description: `${planId === 'MONTHLY' ? 'Monthly' : 'Yearly'} Premium Plan`,
-          order_id: order.orderId,
-          prefill: {
-            name: user?.name || '',
-            email: user?.email || '',
-          },
-          theme: { color: '#1a56db' },
-          handler: async (response) => {
-            try {
-              // 4. Verify signature on backend
-              await subscriptionService.verifyPayment({
-                razorpayOrderId: response.razorpay_order_id,
-                razorpayPaymentId: response.razorpay_payment_id,
-                razorpaySignature: response.razorpay_signature,
-              });
-              updateUser({ isPremium: true });
-              setPaymentSuccess(true);
-              resolve();
-            } catch (err) {
-              reject(err);
-            }
-          },
-          modal: {
-            ondismiss: () => reject(new Error('Payment cancelled')),
-          },
-        };
-        const rzp = new window.Razorpay(options);
-        rzp.on('payment.failed', (res) =>
-          reject(new Error(res.error?.description || 'Payment failed'))
-        );
-        rzp.open();
-      });
-    } catch (err) {
-      if (err.message !== 'Payment cancelled') {
-        setPaymentError(err.message);
-      }
-    } finally {
-      setProcessingPlan(null);
-    }
+  const handleSuccess = () => {
+    setSelectedPlan(null);
+    setPaymentSuccess(true);
   };
 
   if (paymentSuccess) {
@@ -163,10 +212,13 @@ export default function Premium() {
         <div style={{ textAlign: 'center', padding: '80px 20px' }}>
           <div style={{ fontSize: 64, marginBottom: 20 }}>🎉</div>
           <h1 style={{ fontSize: 28, fontWeight: 800, marginBottom: 12 }}>
-            Welcome to CareerSetu Premium!
+            Payment Received!
           </h1>
-          <p style={{ color: 'var(--text-muted)', marginBottom: 28 }}>
-            Your subscription is now active. Enjoy unlimited access to all premium features.
+          <p style={{ color: 'var(--text-muted)', marginBottom: 8, maxWidth: 480, margin: '0 auto 16px' }}>
+            Thank you for subscribing to CareerSetu Premium! Your account will be activated within <strong>2–4 hours</strong> after payment verification.
+          </p>
+          <p style={{ color: 'var(--text-muted)', fontSize: 13, marginBottom: 28 }}>
+            For any issues contact: abhishekpandit08939@gmail.com
           </p>
           <Link to="/dashboard" className="btn btn-primary btn-lg">
             Go to Dashboard →
@@ -178,6 +230,15 @@ export default function Premium() {
 
   return (
     <div className="premium-page">
+      {selectedPlan && (
+        <UPIModal
+          plan={selectedPlan}
+          user={user}
+          onClose={() => setSelectedPlan(null)}
+          onSuccess={handleSuccess}
+        />
+      )}
+
       <div className="premium-hero">
         <div className="container">
           <div className="premium-hero-content">
@@ -202,12 +263,6 @@ export default function Premium() {
       </div>
 
       <div className="container" style={{ padding: '48px 20px' }}>
-        {paymentError && (
-          <div className="auth-error-banner" style={{ marginBottom: 24, maxWidth: 600, margin: '0 auto 24px' }}>
-            ⚠️ {paymentError}
-          </div>
-        )}
-
         <div className="pricing-grid">
           {plans.map((plan) => (
             <div key={plan.id} className={`pricing-card card ${plan.id === 'MONTHLY' ? 'featured' : ''}`}>
@@ -235,11 +290,7 @@ export default function Premium() {
               </div>
               <div className="pricing-cta">
                 {plan.id === 'free' ? (
-                  <Link
-                    to="/register"
-                    className="btn btn-outline btn-lg w-full"
-                    style={{ justifyContent: 'center' }}
-                  >
+                  <Link to="/register" className="btn btn-outline btn-lg w-full" style={{ justifyContent: 'center' }}>
                     Get Started Free
                   </Link>
                 ) : user?.isPremium ? (
@@ -251,11 +302,9 @@ export default function Premium() {
                   <button
                     className="btn btn-lg w-full"
                     style={{ background: plan.color, color: '#fff', justifyContent: 'center' }}
-                    onClick={() => handleSubscribe(plan.id)}
-                    disabled={processingPlan === plan.id}
+                    onClick={() => handleSubscribe(plan)}
                   >
-                    <Sparkles size={16} />
-                    {processingPlan === plan.id ? 'Processing...' : `Get ${plan.name}`}
+                    <Sparkles size={16} /> Get {plan.name}
                   </button>
                 )}
               </div>
@@ -263,16 +312,29 @@ export default function Premium() {
           ))}
         </div>
 
+        {/* UPI Info */}
+        <div style={{
+          marginTop: 40, background: '#f0f4ff', borderRadius: 16,
+          padding: 28, textAlign: 'center', maxWidth: 500, margin: '40px auto 0',
+        }}>
+          <div style={{ fontSize: 32, marginBottom: 8 }}>🔒</div>
+          <h3 style={{ fontWeight: 700, marginBottom: 8 }}>100% Secure UPI Payment</h3>
+          <p style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.7 }}>
+            We accept payments via any UPI app — GPay, PhonePe, Paytm, BHIM, and more.<br />
+            UPI ID: <strong style={{ color: '#1a56db' }}>{UPI_ID}</strong>
+          </p>
+        </div>
+
         {/* FAQ */}
-        <div style={{ marginTop: 60, maxWidth: 700, margin: '60px auto 0' }}>
+        <div style={{ marginTop: 48, maxWidth: 700, margin: '48px auto 0' }}>
           <h2 className="section-title" style={{ textAlign: 'center', marginBottom: 28 }}>
             Frequently Asked Questions
           </h2>
           {[
-            { q: 'Can I cancel my subscription anytime?', a: 'Yes — access continues until billing period ends.' },
-            { q: 'Is there a refund policy?', a: '7-day money-back guarantee if you\'re not satisfied.' },
-            { q: 'What payment methods are accepted?', a: 'All methods via Razorpay — UPI, cards, netbanking, wallets.' },
-            { q: 'Is my payment data secure?', a: 'We never store card data. All payments are processed by Razorpay.' },
+            { q: 'How long does activation take?', a: 'Premium is activated within 2–4 hours after payment verification.' },
+            { q: 'Which UPI apps are supported?', a: 'GPay, PhonePe, Paytm, BHIM, Amazon Pay — any UPI app works.' },
+            { q: 'Is there a refund policy?', a: '7-day money-back guarantee if you are not satisfied.' },
+            { q: 'What if I face a payment issue?', a: 'Email us at abhishekpandit08939@gmail.com with your transaction ID.' },
           ].map((faq, i) => (
             <div key={i} className="faq-item">
               <div className="faq-q">Q: {faq.q}</div>
