@@ -22,10 +22,11 @@ public class JobService {
     private final CompanyRepository companyRepository;
 
     public Page<JobDto> searchJobs(Job.JobType type, String location,
-                                    Integer salaryMin, String search,
-                                    int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "postedAt"));
-        return jobRepository.searchJobs(type, location, salaryMin, search, pageable)
+                                   Integer salaryMin, String search,
+                                   int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        String typeStr = (type != null) ? type.name() : null;
+        return jobRepository.searchJobs(typeStr, location, salaryMin, search, pageable)
                 .map(this::toDto);
     }
 

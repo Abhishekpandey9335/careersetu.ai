@@ -14,11 +14,17 @@ import java.util.Optional;
 public interface CompanyRepository extends JpaRepository<Company, Long> {
     Optional<Company> findBySlug(String slug);
 
-    @Query("""
-        SELECT c FROM Company c
-        WHERE (:industry IS NULL OR LOWER(c.industry) LIKE LOWER(CONCAT('%', :industry, '%')))
-          AND (:search IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT('%', :search, '%')))
-        """)
+    @Query(value = """
+        SELECT * FROM companies c
+        WHERE (:industry IS NULL OR LOWER(c.industry::text) LIKE LOWER(CONCAT('%', :industry, '%')))
+          AND (:search IS NULL OR LOWER(c.name::text) LIKE LOWER(CONCAT('%', :search, '%')))
+        """,
+            countQuery = """
+        SELECT COUNT(*) FROM companies c
+        WHERE (:industry IS NULL OR LOWER(c.industry::text) LIKE LOWER(CONCAT('%', :industry, '%')))
+          AND (:search IS NULL OR LOWER(c.name::text) LIKE LOWER(CONCAT('%', :search, '%')))
+        """,
+            nativeQuery = true)
     Page<Company> searchCompanies(
             @Param("industry") String industry,
             @Param("search") String search,

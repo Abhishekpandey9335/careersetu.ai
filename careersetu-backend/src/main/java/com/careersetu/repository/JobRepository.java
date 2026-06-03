@@ -14,23 +14,25 @@ import java.util.List;
 public interface JobRepository extends JpaRepository<Job, Long> {
 
     @Query(value = """
-    SELECT j FROM Job j
-    WHERE j.status = 'ACTIVE'
-      AND (:type IS NULL OR j.type = :type)
-      AND (:location IS NULL OR LOWER(j.location) LIKE LOWER(CONCAT('%', :location, '%')))
-      AND (:salaryMin IS NULL OR j.salaryMin >= :salaryMin)
-      AND (:search IS NULL OR LOWER(j.title) LIKE LOWER(CONCAT('%', :search, '%')))
-    """,
+        SELECT * FROM jobs j
+        WHERE j.status = 'ACTIVE'
+          AND (:type IS NULL OR j.type = CAST(:type AS VARCHAR))
+          AND (:location IS NULL OR LOWER(j.location::text) LIKE LOWER(CONCAT('%', :location, '%')))
+          AND (:salaryMin IS NULL OR j.salary_min >= CAST(:salaryMin AS INTEGER))
+          AND (:search IS NULL OR LOWER(j.title::text) LIKE LOWER(CONCAT('%', :search, '%')))
+        ORDER BY j.posted_at DESC
+        """,
             countQuery = """
-    SELECT COUNT(j) FROM Job j
-    WHERE j.status = 'ACTIVE'
-      AND (:type IS NULL OR j.type = :type)
-      AND (:location IS NULL OR LOWER(j.location) LIKE LOWER(CONCAT('%', :location, '%')))
-      AND (:salaryMin IS NULL OR j.salaryMin >= :salaryMin)
-      AND (:search IS NULL OR LOWER(j.title) LIKE LOWER(CONCAT('%', :search, '%')))
-    """)
+        SELECT COUNT(*) FROM jobs j
+        WHERE j.status = 'ACTIVE'
+          AND (:type IS NULL OR j.type = CAST(:type AS VARCHAR))
+          AND (:location IS NULL OR LOWER(j.location::text) LIKE LOWER(CONCAT('%', :location, '%')))
+          AND (:salaryMin IS NULL OR j.salary_min >= CAST(:salaryMin AS INTEGER))
+          AND (:search IS NULL OR LOWER(j.title::text) LIKE LOWER(CONCAT('%', :search, '%')))
+        """,
+            nativeQuery = true)
     Page<Job> searchJobs(
-            @Param("type") Job.JobType type,
+            @Param("type") String type,
             @Param("location") String location,
             @Param("salaryMin") Integer salaryMin,
             @Param("search") String search,
