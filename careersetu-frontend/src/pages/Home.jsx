@@ -155,12 +155,12 @@ export default function Home() {
                 <Sparkles size={14} /> India's #1 AI-Powered Career Platform
               </div>
               <h1 className="hero-title">
-                All Your Career<br />
-                Needs, <span className="gradient-text">One Place.</span>
+                India's Smartest<br />
+                <span className="gradient-text">Career Platform.</span>
               </h1>
               <p className="hero-subtitle">
-                Govt Jobs • Private Jobs • Internships • Study Material<br />
-                AI Guidance • Roadmaps & More
+                From your first job to your dream role — get AI-powered guidance,<br />
+                curated opportunities, and proven roadmaps. All free.
               </p>
               <div className="hero-stats">
                 {[['25K+', 'Exams'], ['15K+', 'Jobs'], ['5K+', 'Internships'], ['10K+', 'Study Materials']].map(([num, label]) => (
