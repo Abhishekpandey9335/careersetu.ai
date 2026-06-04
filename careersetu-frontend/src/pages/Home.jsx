@@ -189,6 +189,8 @@ export default function Home() {
                   { icon: '🎓', title: 'Internships', desc: '5,000+ opportunities', color: '#0e9f6e', path: '/internships' },
                   { icon: '🤖', title: 'AI Advisor', desc: 'Personalized guidance', color: '#f59e0b', path: '/ai-advisor' },
                   { icon: '🎯', title: 'Strategies', desc: 'PDFs · Roadmaps · Resources', color: '#ef4444', path: '/learn' },
+                  { icon: '📊', title: 'Companies', desc: 'Top company insights', color: '#0ea5e9', path: '/company-explorer' },
+
                 ].map(item => (
                   <Link key={item.title} to={item.path} style={{ textDecoration: 'none' }}>
                     <div style={{
