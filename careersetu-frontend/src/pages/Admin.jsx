@@ -37,6 +37,12 @@ export default function Admin() {
     fetchSubscriptions(filter);
   }, []);
 
+  useEffect(() => {
+    if (activeTab === 'pdfPurchases') {
+      fetchPdfPurchases('ALL');
+    }
+  }, [activeTab]);
+
   async function fetchStats() {
     try {
       const [statsRes, pdfStatsRes] = await Promise.all([
@@ -89,7 +95,6 @@ export default function Admin() {
   function switchTab(tab) {
     setActiveTab(tab);
     if (tab === 'users' && users.length === 0) fetchUsers();
-    if (tab === 'pdfPurchases') fetchPdfPurchases('ALL');
   }
 
   async function approve(id) {
@@ -160,13 +165,11 @@ export default function Admin() {
     <div style={{ minHeight: '100vh', background: '#f8fafc', padding: '24px' }}>
       <div style={{ maxWidth: 1100, margin: '0 auto' }}>
 
-        {/* Header */}
         <div style={{ marginBottom: 24 }}>
           <h1 style={{ fontSize: 26, fontWeight: 800, margin: 0 }}>🛡️ Admin Panel</h1>
           <p style={{ color: '#64748b', margin: '4px 0 0' }}>CareerSetu — {user?.email}</p>
         </div>
 
-        {/* Toast */}
         {message && (
           <div style={{
             padding: '12px 16px', borderRadius: 8, marginBottom: 20,
@@ -176,7 +179,6 @@ export default function Admin() {
           }}>{message}</div>
         )}
 
-        {/* Stats */}
         {stats && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 14, marginBottom: 24 }}>
             {[
@@ -201,7 +203,6 @@ export default function Admin() {
           </div>
         )}
 
-        {/* Tabs */}
         <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
           <button onClick={() => switchTab('payments')} style={tabStyle('payments')}>💳 Plan Payments</button>
           <button onClick={() => switchTab('pdfPurchases')} style={tabStyle('pdfPurchases')}>
@@ -216,7 +217,7 @@ export default function Admin() {
           <button onClick={() => switchTab('users')} style={tabStyle('users')}>👥 Users</button>
         </div>
 
-        {/* ── PAYMENTS TAB ── */}
+        {/* PAYMENTS TAB */}
         {activeTab === 'payments' && (
           <div>
             <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
@@ -241,28 +242,12 @@ export default function Admin() {
                   }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
                       <div>
-                        <div style={{ fontWeight: 800, fontSize: 16, marginBottom: 6 }}>
-                          👑 {sub.plan} Plan — ₹{sub.amount}
-                        </div>
-                        <div style={{ fontSize: 13, color: '#64748b', marginBottom: 4 }}>
-                          🆔 #{sub.id} &nbsp;|&nbsp; 📅 {new Date(sub.createdAt).toLocaleString('en-IN')}
-                        </div>
-                        <div style={{ fontSize: 13, marginBottom: 4 }}>
-                          👤 <strong>{sub.user?.name || 'N/A'}</strong> &nbsp;({sub.user?.email})
-                        </div>
-                        <div style={{ fontSize: 13, fontFamily: 'monospace', marginBottom: 4 }}>
-                          💳 UPI TxnID: <strong>{sub.upiTransactionId || '—'}</strong>
-                        </div>
+                        <div style={{ fontWeight: 800, fontSize: 16, marginBottom: 6 }}>👑 {sub.plan} Plan — ₹{sub.amount}</div>
+                        <div style={{ fontSize: 13, color: '#64748b', marginBottom: 4 }}>🆔 #{sub.id} &nbsp;|&nbsp; 📅 {new Date(sub.createdAt).toLocaleString('en-IN')}</div>
+                        <div style={{ fontSize: 13, marginBottom: 4 }}>👤 <strong>{sub.user?.name || 'N/A'}</strong> &nbsp;({sub.user?.email})</div>
+                        <div style={{ fontSize: 13, fontFamily: 'monospace', marginBottom: 4 }}>💳 UPI TxnID: <strong>{sub.upiTransactionId || '—'}</strong></div>
                         {sub.screenshotUrl && (
-                          <a href={sub.screenshotUrl} target="_blank" rel="noopener noreferrer"
-                            style={{ color: '#6366f1', fontWeight: 600, fontSize: 13 }}>
-                            🖼️ Screenshot dekho →
-                          </a>
-                        )}
-                        {sub.status === 'ACTIVE' && sub.endDate && (
-                          <div style={{ fontSize: 12, color: '#0e9f6e', marginTop: 4 }}>
-                            Valid till: {new Date(sub.endDate).toLocaleDateString('en-IN')}
-                          </div>
+                          <a href={sub.screenshotUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#6366f1', fontWeight: 600, fontSize: 13 }}>🖼️ Screenshot dekho →</a>
                         )}
                       </div>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-end' }}>
@@ -292,7 +277,7 @@ export default function Admin() {
           </div>
         )}
 
-        {/* ── PDF PURCHASES TAB ── */}
+        {/* PDF PURCHASES TAB */}
         {activeTab === 'pdfPurchases' && (
           <div>
             <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
@@ -302,7 +287,6 @@ export default function Admin() {
                 </button>
               ))}
             </div>
-
             {pdfLoading ? (
               <div style={{ textAlign: 'center', padding: 40, color: '#64748b' }}>Loading...</div>
             ) : pdfPurchases.length === 0 ? (
@@ -320,28 +304,15 @@ export default function Admin() {
                     }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
                         <div>
-                          <div style={{ fontWeight: 800, fontSize: 16, marginBottom: 6 }}>
-                            {meta.emoji} {meta.label} — {meta.price}
-                          </div>
-                          <div style={{ fontSize: 13, color: '#64748b', marginBottom: 4 }}>
-                            🆔 #{p.id} &nbsp;|&nbsp; 📅 {new Date(p.createdAt).toLocaleString('en-IN')}
-                          </div>
-                          <div style={{ fontSize: 13, marginBottom: 4 }}>
-                            👤 <strong>{p.user?.name || 'N/A'}</strong> &nbsp;({p.user?.email})
-                          </div>
-                          <div style={{ fontSize: 13, fontFamily: 'monospace', marginBottom: 4 }}>
-                            💳 UPI TxnID: <strong>{p.upiTransactionId || '—'}</strong>
-                          </div>
+                          <div style={{ fontWeight: 800, fontSize: 16, marginBottom: 6 }}>{meta.emoji} {meta.label} — {meta.price}</div>
+                          <div style={{ fontSize: 13, color: '#64748b', marginBottom: 4 }}>🆔 #{p.id} &nbsp;|&nbsp; 📅 {new Date(p.createdAt).toLocaleString('en-IN')}</div>
+                          <div style={{ fontSize: 13, marginBottom: 4 }}>👤 <strong>{p.user?.name || 'N/A'}</strong> &nbsp;({p.user?.email})</div>
+                          <div style={{ fontSize: 13, fontFamily: 'monospace', marginBottom: 4 }}>💳 UPI TxnID: <strong>{p.upiTransactionId || '—'}</strong></div>
                           {p.screenshotUrl && (
-                            <a href={p.screenshotUrl} target="_blank" rel="noopener noreferrer"
-                              style={{ color: '#6366f1', fontWeight: 600, fontSize: 13 }}>
-                              🖼️ Screenshot dekho →
-                            </a>
+                            <a href={p.screenshotUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#6366f1', fontWeight: 600, fontSize: 13 }}>🖼️ Screenshot dekho →</a>
                           )}
                           {p.status === 'APPROVED' && p.approvedAt && (
-                            <div style={{ fontSize: 12, color: '#0e9f6e', marginTop: 4 }}>
-                              ✅ Approved on: {new Date(p.approvedAt).toLocaleString('en-IN')}
-                            </div>
+                            <div style={{ fontSize: 12, color: '#0e9f6e', marginTop: 4 }}>✅ Approved on: {new Date(p.approvedAt).toLocaleString('en-IN')}</div>
                           )}
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-end' }}>
@@ -372,14 +343,12 @@ export default function Admin() {
           </div>
         )}
 
-        {/* ── USERS TAB ── */}
+        {/* USERS TAB */}
         {activeTab === 'users' && (
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
               <div style={{ fontWeight: 700, fontSize: 16 }}>👥 Total Users: {stats?.totalUsers || '—'}</div>
-              <button onClick={fetchUsers} style={{ padding: '7px 16px', borderRadius: 8, border: 'none', cursor: 'pointer', background: '#6366f1', color: '#fff', fontWeight: 600, fontSize: 13 }}>
-                🔄 Refresh
-              </button>
+              <button onClick={fetchUsers} style={{ padding: '7px 16px', borderRadius: 8, border: 'none', cursor: 'pointer', background: '#6366f1', color: '#fff', fontWeight: 600, fontSize: 13 }}>🔄 Refresh</button>
             </div>
             {usersLoading ? (
               <div style={{ textAlign: 'center', padding: 40, color: '#64748b' }}>Loading users...</div>
