@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Search, Bell, Menu, X, ChevronDown, Sparkles, LogOut, LayoutDashboard, Crown } from 'lucide-react';
+import { Search, Bell, Menu, X, ChevronDown, Sparkles, LogOut, LayoutDashboard, Crown, BookOpen } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
 
@@ -10,9 +10,7 @@ const navLinks = [
   { label: 'Private Jobs', path: '/private-jobs' },
   { label: 'Internships', path: '/internships' },
   { label: 'Companies', path: '/companies' },
-  { label: 'Study Material', path: '/study-material' },
-  { label: 'Roadmaps', path: '/roadmaps' },
-  { label: 'Resources', path: '/resources' },
+  { label: 'Learn', path: '/learn' },   // ← replaces Study Material + Roadmaps + Resources
 ];
 
 export default function Navbar() {
@@ -31,6 +29,13 @@ export default function Navbar() {
 
   const isActive = (path) => {
     if (path === '/') return location.pathname === '/';
+    // Also highlight "Learn" when on old URLs
+    if (path === '/learn') {
+      return location.pathname.startsWith('/learn')
+        || location.pathname.startsWith('/study-material')
+        || location.pathname.startsWith('/roadmap')
+        || location.pathname.startsWith('/resources');
+    }
     return location.pathname.startsWith(path);
   };
 
@@ -113,6 +118,9 @@ export default function Navbar() {
                     </div>
                     <Link to="/dashboard" className="user-dropdown-item" onClick={() => setUserMenuOpen(false)}>
                       <LayoutDashboard size={15} /> My Dashboard
+                    </Link>
+                    <Link to="/learn" className="user-dropdown-item" onClick={() => setUserMenuOpen(false)}>
+                      <BookOpen size={15} /> Learn Hub
                     </Link>
                     <Link to="/premium" className="user-dropdown-item premium-item" onClick={() => setUserMenuOpen(false)}>
                       <Crown size={15} /> Upgrade to Premium

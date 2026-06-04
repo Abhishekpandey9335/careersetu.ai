@@ -10,15 +10,13 @@ import GovtExams from './pages/GovtExams';
 import ExamDetail from './pages/ExamDetail';
 import PrivateJobs from './pages/PrivateJobs';
 import Internships from './pages/Internships';
-import StudyMaterial from './pages/StudyMaterial';
-import Roadmaps from './pages/Roadmaps';
+import LearnHub from './pages/LearnHub';
 import AIAdvisor from './pages/AIAdvisor';
 import Dashboard from './pages/Dashboard';
 import EligibilityChecker from './pages/EligibilityChecker';
 import CompanyExplorer from './pages/CompanyExplorer';
 import CompanyDetail from './pages/CompanyDetail';
 import SalaryExplorer from './pages/SalaryExplorer';
-import Resources from './pages/Resources';
 import Premium from './pages/Premium';
 import Admin from './pages/Admin';
 import { Login, Register } from './pages/Auth';
@@ -55,15 +53,21 @@ export default function App() {
           <Route path="/exam/:slug" element={<Layout><ExamDetail /></Layout>} />
           <Route path="/private-jobs" element={<Layout><PrivateJobs /></Layout>} />
           <Route path="/internships" element={<Layout><Internships /></Layout>} />
-          <Route path="/study-material" element={<Layout><StudyMaterial /></Layout>} />
-          <Route path="/roadmaps" element={<Layout><Roadmaps /></Layout>} />
-          <Route path="/roadmap/:slug" element={<Layout><Roadmaps /></Layout>} />
+
+          {/* LearnHub — replaces /study-material, /roadmaps, /resources */}
+          <Route path="/learn" element={<Layout><LearnHub /></Layout>} />
+
+          {/* Old URLs redirect to LearnHub (backward compat) */}
+          <Route path="/study-material" element={<Layout><LearnHub /></Layout>} />
+          <Route path="/roadmaps" element={<Layout><LearnHub /></Layout>} />
+          <Route path="/roadmap/:slug" element={<Layout><LearnHub /></Layout>} />
+          <Route path="/resources" element={<Layout><LearnHub /></Layout>} />
+
           <Route path="/eligibility-checker" element={<Layout><EligibilityChecker /></Layout>} />
           <Route path="/company-explorer" element={<Layout><CompanyExplorer /></Layout>} />
           <Route path="/companies" element={<Layout><CompanyExplorer /></Layout>} />
           <Route path="/company/:slug" element={<Layout><CompanyDetail /></Layout>} />
           <Route path="/salary-explorer" element={<Layout><SalaryExplorer /></Layout>} />
-          <Route path="/resources" element={<Layout><Resources /></Layout>} />
           <Route path="/premium" element={<Layout><Premium /></Layout>} />
 
           {/* AI Advisor */}
