@@ -188,8 +188,7 @@ export default function Home() {
                   { icon: '💼', title: 'Private Jobs', desc: '15,000+ openings', color: '#7e3af2', path: '/private-jobs' },
                   { icon: '🎓', title: 'Internships', desc: '5,000+ opportunities', color: '#0e9f6e', path: '/internships' },
                   { icon: '🤖', title: 'AI Advisor', desc: 'Personalized guidance', color: '#f59e0b', path: '/ai-advisor' },
-                  { icon: '📚', title: 'Study Material', desc: 'Free resources', color: '#ef4444', path: '/study-material' },
-                  { icon: '🗺️', title: 'Roadmaps', desc: 'Step-by-step plans', color: '#0ea5e9', path: '/roadmaps' },
+                  { icon: '🎯', title: 'Strategies', desc: 'PDFs · Roadmaps · Resources', color: '#ef4444', path: '/learn' },
                 ].map(item => (
                   <Link key={item.title} to={item.path} style={{ textDecoration: 'none' }}>
                     <div style={{
