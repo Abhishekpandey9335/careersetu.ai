@@ -10,7 +10,7 @@ const navLinks = [
   { label: 'Private Jobs', path: '/private-jobs' },
   { label: 'Internships', path: '/internships' },
   { label: 'Companies', path: '/companies' },
-  { label: 'Learn', path: '/learn' },   // ← replaces Study Material + Roadmaps + Resources
+  { label: 'Strategies', path: '/learn' },   // ← replaces Study Material + Roadmaps + Resources
 ];
 
 export default function Navbar() {

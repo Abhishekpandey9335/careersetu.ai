@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import {
   BookOpen, Map, Newspaper, Lock, Eye, Download, Crown,
   ChevronRight, Search, Star, Clock, Target, CheckCircle,
-  Sparkles, ExternalLink, Gift, Calendar, Video, X, Copy, Check
+  Sparkles, ExternalLink, Gift, Calendar, Video, X, Copy, Check,
+  Upload, Camera, ImageIcon
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { roadmaps } from '../data/mockData';
@@ -64,7 +65,7 @@ const PDF_CATALOG = [
   },
 ];
 
-// ─── Resources (from original Resources.jsx) ────────────────────────────────
+// ─── Resources ────────────────────────────────────────────────────────────────
 const blogPosts = [
   { id: 1, title: 'SSC CGL vs Bank PO — Which is Better in 2024?', category: 'Career Advice', date: '15 Nov 2024', readTime: '5 min' },
   { id: 2, title: 'Top 10 Government Exam Preparation Tips', category: 'Study Tips', date: '10 Nov 2024', readTime: '7 min' },
@@ -83,7 +84,6 @@ const freeTools = [
   { name: 'Gradeup', desc: 'Exam prep', link: 'https://byjusexamprep.com', icon: '📚' },
 ];
 
-// ─── Roadmap Details (from original Roadmaps.jsx) ────────────────────────────
 const roadmapDetails = {
   'ssc-cgl': {
     phases: [
@@ -94,14 +94,33 @@ const roadmapDetails = {
   }
 };
 
+// ─── Upload screenshot to ImgBB ───────────────────────────────────────────────
+async function uploadToImgBB(file) {
+  const IMGBB_API_KEY = 'f343929c3b7f09e93809d02fef3478e2'; // free key — replace with yours from imgbb.com
+  const formData = new FormData();
+  formData.append('image', file);
+  const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+    method: 'POST',
+    body: formData,
+  });
+  const data = await res.json();
+  if (!data.success) throw new Error('Image upload failed');
+  return data.data.url;
+}
+
 // ─── Modal: UPI Payment ───────────────────────────────────────────────────────
 function PurchaseModal({ pdf, onClose, onSuccess }) {
-  const [step, setStep] = useState(1); // 1=info, 2=payment, 3=submit
+  const [step, setStep] = useState(1);
   const [txnId, setTxnId] = useState('');
   const [screenshotUrl, setScreenshotUrl] = useState('');
+  const [screenshotFile, setScreenshotFile] = useState(null);
+  const [screenshotPreview, setScreenshotPreview] = useState('');
+  const [uploadMode, setUploadMode] = useState('file'); // 'file' | 'url'
+  const [uploading, setUploading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const fileInputRef = useRef(null);
 
   const token = localStorage.getItem('accessToken');
 
@@ -111,16 +130,65 @@ function PurchaseModal({ pdf, onClose, onSuccess }) {
     setTimeout(() => setCopied(false), 2000);
   }
 
+  function handleFileSelect(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      setError('Sirf image file select karo (JPG, PNG, etc.)');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setError('File size 5MB se kam honi chahiye');
+      return;
+    }
+    setError('');
+    setScreenshotFile(file);
+    setScreenshotPreview(URL.createObjectURL(file));
+    setScreenshotUrl(''); // clear manual url
+  }
+
+  async function handleUpload() {
+    if (!screenshotFile) return;
+    setUploading(true);
+    setError('');
+    try {
+      const url = await uploadToImgBB(screenshotFile);
+      setScreenshotUrl(url);
+      setUploading(false);
+    } catch (e) {
+      setError('Image upload failed. Manual URL daalo ya dobara try karo.');
+      setUploading(false);
+    }
+  }
+
   async function submitPayment() {
     if (!txnId.trim()) { setError('UPI Transaction ID daalo'); return; }
-    if (!screenshotUrl.trim()) { setError('Screenshot URL daalo (Google Drive / ImgBB link)'); return; }
+
+    let finalUrl = screenshotUrl.trim();
+
+    // If file selected but not uploaded yet, upload first
+    if (screenshotFile && !finalUrl) {
+      setUploading(true);
+      try {
+        finalUrl = await uploadToImgBB(screenshotFile);
+        setScreenshotUrl(finalUrl);
+        setUploading(false);
+      } catch (e) {
+        setError('Screenshot upload failed. Manual URL daalo ya dobara try karo.');
+        setUploading(false);
+        return;
+      }
+    }
+
+    if (!finalUrl) { setError('Screenshot upload karo ya URL daalo'); return; }
+
     setLoading(true);
     setError('');
     try {
       const res = await fetch(`${API}/premium/purchase`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ pdfType: pdf.key, upiTransactionId: txnId, screenshotUrl })
+        body: JSON.stringify({ pdfType: pdf.key, upiTransactionId: txnId, screenshotUrl: finalUrl })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Error occurred');
@@ -178,9 +246,9 @@ function PurchaseModal({ pdf, onClose, onSuccess }) {
             </div>
             <div className="lh-steps">
               <div className="lh-step"><span>1</span> UPI ID copy karo aur ₹{pdf.price} pay karo</div>
-              <div className="lh-step"><span>2</span> Screenshot lo payment ka</div>
-              <div className="lh-step"><span>3</span> ImgBB / Google Drive pe upload karo aur link copy karo</div>
-              <div className="lh-step"><span>4</span> Next step pe TxnID aur link daalo</div>
+              <div className="lh-step"><span>2</span> Payment ka screenshot lo</div>
+              <div className="lh-step"><span>3</span> Next step pe screenshot directly upload karo</div>
+              <div className="lh-step"><span>4</span> TxnID daalo aur submit karo</div>
             </div>
             <div style={{ display: 'flex', gap: 10 }}>
               <button className="lh-btn-secondary" onClick={() => setStep(1)}>← Back</button>
@@ -195,6 +263,7 @@ function PurchaseModal({ pdf, onClose, onSuccess }) {
               <h3>Payment Proof Submit Karo</h3>
               <p>Admin verify karke access de dega (2–6 hrs)</p>
             </div>
+
             <div className="lh-form-group">
               <label>UPI Transaction ID *</label>
               <input
@@ -205,21 +274,100 @@ function PurchaseModal({ pdf, onClose, onSuccess }) {
                 className="lh-input"
               />
             </div>
+
+            {/* Screenshot Upload Section */}
             <div className="lh-form-group">
-              <label>Screenshot URL * (ImgBB / Google Drive / Imgur)</label>
-              <input
-                type="text"
-                placeholder="https://ibb.co/..."
-                value={screenshotUrl}
-                onChange={e => setScreenshotUrl(e.target.value)}
-                className="lh-input"
-              />
+              <label>Payment Screenshot *</label>
+
+              {/* Toggle: Upload vs URL */}
+              <div className="lh-upload-toggle">
+                <button
+                  className={`lh-toggle-btn ${uploadMode === 'file' ? 'active' : ''}`}
+                  onClick={() => setUploadMode('file')}
+                >
+                  <Camera size={14} /> Direct Upload
+                </button>
+                <button
+                  className={`lh-toggle-btn ${uploadMode === 'url' ? 'active' : ''}`}
+                  onClick={() => setUploadMode('url')}
+                >
+                  <ImageIcon size={14} /> Paste URL
+                </button>
+              </div>
+
+              {uploadMode === 'file' ? (
+                <div className="lh-upload-area">
+                  {screenshotPreview ? (
+                    <div className="lh-preview-wrap">
+                      <img src={screenshotPreview} alt="Screenshot preview" className="lh-preview-img" />
+                      <div className="lh-preview-actions">
+                        {screenshotUrl ? (
+                          <span className="lh-upload-success">✅ Uploaded successfully</span>
+                        ) : (
+                          <button
+                            className="lh-btn-upload"
+                            onClick={handleUpload}
+                            disabled={uploading}
+                          >
+                            {uploading ? 'Uploading...' : '⬆️ Upload to server'}
+                          </button>
+                        )}
+                        <button
+                          className="lh-btn-change"
+                          onClick={() => {
+                            setScreenshotFile(null);
+                            setScreenshotPreview('');
+                            setScreenshotUrl('');
+                          }}
+                        >
+                          Change
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div
+                      className="lh-drop-zone"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <Camera size={28} className="lh-drop-icon" />
+                      <p className="lh-drop-text">Screenshot click karo ya gallery se choose karo</p>
+                      <p className="lh-drop-sub">JPG, PNG · Max 5MB</p>
+                      <button className="lh-btn-choose">
+                        📷 Choose / Camera
+                      </button>
+                    </div>
+                  )}
+                  {/* Hidden file input — accept="image/*" + capture for mobile camera */}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    style={{ display: 'none' }}
+                    onChange={handleFileSelect}
+                  />
+                </div>
+              ) : (
+                <input
+                  type="text"
+                  placeholder="https://ibb.co/... ya Google Drive link"
+                  value={screenshotUrl}
+                  onChange={e => setScreenshotUrl(e.target.value)}
+                  className="lh-input"
+                />
+              )}
             </div>
+
             {error && <p className="lh-error">{error}</p>}
+
             <div style={{ display: 'flex', gap: 10 }}>
               <button className="lh-btn-secondary" onClick={() => setStep(2)}>← Back</button>
-              <button className="lh-btn-primary" onClick={submitPayment} disabled={loading}>
-                {loading ? 'Submitting...' : '✅ Submit for Review'}
+              <button
+                className="lh-btn-primary"
+                onClick={submitPayment}
+                disabled={loading || uploading}
+              >
+                {loading ? 'Submitting...' : uploading ? 'Uploading...' : '✅ Submit for Review'}
               </button>
             </div>
           </>
@@ -266,8 +414,8 @@ export default function LearnHub() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedMaterialType, setSelectedMaterialType] = useState('All');
   const [selectedRoadmap, setSelectedRoadmap] = useState(null);
-  const [accessMap, setAccessMap] = useState({}); // { HR_CONTACTS: 'APPROVED'/'PENDING'/'LOCKED' }
-  const [purchaseModal, setPurchaseModal] = useState(null); // pdf object
+  const [accessMap, setAccessMap] = useState({});
+  const [purchaseModal, setPurchaseModal] = useState(null);
   const [viewerPdf, setViewerPdf] = useState(null);
   const [successMsg, setSuccessMsg] = useState('');
 
@@ -321,7 +469,7 @@ export default function LearnHub() {
     <div className="learnhub">
       {/* Hero */}
       <div className="lh-hero">
-        <h1 className="lh-hero-title">📚 Learn Hub</h1>
+        <h1 className="lh-hero-title">🎯 Strategies</h1>
         <p className="lh-hero-sub">Study Materials · Resources · Roadmaps — sab ek jagah</p>
 
         {/* Tabs */}
@@ -352,7 +500,6 @@ export default function LearnHub() {
         {/* ── STUDY MATERIALS TAB ── */}
         {activeTab === 'materials' && (
           <div>
-            {/* PDF Section */}
             <div className="lh-section">
               <div className="lh-section-header">
                 <Crown size={20} className="lh-crown" />
@@ -450,7 +597,6 @@ export default function LearnHub() {
         {/* ── RESOURCES TAB ── */}
         {activeTab === 'resources' && (
           <div>
-            {/* Blog Posts */}
             <div className="lh-section">
               <h2 className="lh-section-title">📰 Latest Articles</h2>
               <div className="lh-resource-list">
@@ -469,7 +615,6 @@ export default function LearnHub() {
               </div>
             </div>
 
-            {/* YouTube */}
             <div className="lh-section" style={{ marginTop: 32 }}>
               <h2 className="lh-section-title">📺 Top YouTube Channels</h2>
               <div className="lh-yt-grid">
@@ -486,7 +631,6 @@ export default function LearnHub() {
               </div>
             </div>
 
-            {/* Free Tools */}
             <div className="lh-section" style={{ marginTop: 32 }}>
               <h2 className="lh-section-title">🛠️ Free Tools & Platforms</h2>
               <div className="lh-tools-grid">
@@ -518,7 +662,6 @@ export default function LearnHub() {
                       <p className="lh-roadmap-desc">{rm.description}</p>
                       <div className="lh-roadmap-meta">
                         <span><Clock size={12} /> {rm.duration}</span>
-                        <span><Users size={12} /> {rm.enrolled}</span>
                       </div>
                       <button className="lh-btn-sm lh-btn-sm--full">
                         View Roadmap <ChevronRight size={13} />
@@ -534,7 +677,6 @@ export default function LearnHub() {
                 </button>
                 <h2 className="lh-section-title">{selectedRoadmap.title}</h2>
                 <p style={{ color: '#64748b', marginBottom: 24 }}>{selectedRoadmap.description}</p>
-
                 {(roadmapDetails[selectedRoadmap.id]?.phases || []).map((phase, i) => (
                   <div key={i} className="lh-phase">
                     <div className="lh-phase-header">
