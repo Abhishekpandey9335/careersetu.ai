@@ -21,7 +21,7 @@ export default function Admin() {
   const [users, setUsers] = useState([]);
   const [pdfPurchases, setPdfPurchases] = useState([]);
   const [filter, setFilter] = useState('PENDING');
-  const [pdfFilter, setPdfFilter] = useState('PENDING');
+  const [pdfFilter, setPdfFilter] = useState('ALL');
   const [loading, setLoading] = useState(true);
   const [pdfLoading, setPdfLoading] = useState(false);
   const [usersLoading, setUsersLoading] = useState(false);
@@ -89,7 +89,7 @@ export default function Admin() {
   function switchTab(tab) {
     setActiveTab(tab);
     if (tab === 'users' && users.length === 0) fetchUsers();
-    if (tab === 'pdfPurchases') fetchPdfPurchases(pdfFilter);
+    if (tab === 'pdfPurchases') fetchPdfPurchases('ALL');
   }
 
   async function approve(id) {
