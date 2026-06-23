@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { Instagram, Facebook, Youtube } from 'lucide-react';
 import './Footer.css';
 
 export default function Footer() {
@@ -16,9 +17,15 @@ export default function Footer() {
             </Link>
             <p className="footer-desc">India's most trusted career platform for govt exams, private jobs, internships, study material and career guidance.</p>
             <div className="footer-social">
-              {['📘', '🐦', '📸', '▶️', '✈️'].map((icon, i) => (
-                <a key={i} href="#" className="social-icon">{icon}</a>
-              ))}
+              <a href="https://www.instagram.com/btech.wale25/?hl=en" target="_blank" rel="noopener noreferrer" className="social-icon">
+                <Instagram size={18} />
+              </a>
+              <a href="https://www.facebook.com/profile.php?id=61591213472796" target="_blank" rel="noopener noreferrer" className="social-icon">
+                <Facebook size={18} />
+              </a>
+              <a href="https://www.youtube.com/@BtechWale9" target="_blank" rel="noopener noreferrer" className="social-icon">
+                <Youtube size={18} />
+              </a>
             </div>
             <div className="footer-apps">
               <a href="#" className="app-badge">
