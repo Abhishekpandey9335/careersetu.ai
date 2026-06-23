@@ -69,14 +69,45 @@ export default function AboutUs() {
 
         {/* Founder */}
         <div className="card" style={{ padding: 32, marginBottom: 24 }}>
-          <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 24, color: 'var(--primary)' }}>👨‍💻 Meet the Founder</h2>
+          <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 24, color: 'var(--primary)' }}>👨‍💻 Meet the Founder & CEO</h2>
           <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-            <div style={{ width: 100, height: 100, borderRadius: '50%', background: 'linear-gradient(135deg, #1a56db, #7e3af2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 36, color: 'white', fontWeight: 800, flexShrink: 0 }}>AP</div>
+            <img
+              src="/IMG_20260613_170706.jpg.jpeg"
+              alt="Abhishek Pandey"
+              style={{ width: 100, height: 100, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '3px solid var(--primary)' }}
+            />
             <div style={{ flex: 1, minWidth: 200 }}>
               <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>Abhishek Pandey</h3>
-              <p style={{ color: 'var(--primary)', fontSize: 14, marginBottom: 12 }}>Founder & CEO, CareerSetu | Varanasi, Uttar Pradesh</p>
-              <p style={{ fontSize: 14, lineHeight: 1.8, color: 'var(--text-muted)' }}>
-                Abhishek Pandey is a passionate technologist and career mentor from Varanasi, Uttar Pradesh. Having witnessed firsthand the struggles of millions of students in finding the right career guidance, he founded CareerSetu with a vision to democratize career counseling using the power of Artificial Intelligence. With deep expertise in software development and a strong understanding of India's competitive exam ecosystem, Abhishek has built CareerSetu as a one-stop solution for every career need — from government job notifications to private sector placements, AI-powered guidance to personalized roadmaps.
+              <p style={{ color: 'var(--primary)', fontSize: 14, marginBottom: 12 }}>Founder & CEO, CareerSetu | Varanasi, Uttar Pradesh, India</p>
+              <p style={{ fontSize: 14, lineHeight: 1.8, color: 'var(--text-muted)', marginBottom: 12 }}>
+                Abhishek Pandey is a passionate technologist and career mentor from Varanasi, Uttar Pradesh. Having witnessed firsthand the struggles of millions of students in finding the right career guidance, he founded CareerSetu with a vision to democratize career counseling using the power of Artificial Intelligence. With deep expertise in software development and a strong understanding of India's competitive exam ecosystem, Abhishek has built CareerSetu as a one-stop solution for every career need — from government job notifications to private sector placements, AI-powered guidance to personalized roadmaps. He believes that no dream is too big when backed by the right guidance, and his relentless drive continues to push CareerSetu towards empowering every student in India to achieve their true potential.
+              </p>
+              <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.8 }}>
+                📞 9335203841 &nbsp;|&nbsp; ✉️ abhishekpandit08939@gmail.com<br />
+                📍 Varanasi, Uttar Pradesh, India
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Co-Founder */}
+        <div className="card" style={{ padding: 32, marginBottom: 24 }}>
+          <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 24, color: 'var(--primary)' }}>🤝 Meet the Co-Founder & COO</h2>
+          <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+            <img
+              src="/DSC03653.JPG"
+              alt="Aman Sahu"
+              style={{ width: 100, height: 100, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '3px solid var(--primary)' }}
+            />
+            <div style={{ flex: 1, minWidth: 200 }}>
+              <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>Aman Sahu</h3>
+              <p style={{ color: 'var(--primary)', fontSize: 14, marginBottom: 12 }}>Co-Founder & COO, CareerSetu | Bareilly, Uttar Pradesh, India</p>
+              <p style={{ fontSize: 14, lineHeight: 1.8, color: 'var(--text-muted)', marginBottom: 12 }}>
+                Aman Sahu brings a sharp operational mindset and unwavering dedication to CareerSetu's day-to-day growth. Hailing from Bareilly, Uttar Pradesh, Aman has always believed that consistent execution is what turns a vision into reality. As Co-Founder & COO, he ensures that every student-facing feature, every exam update, and every job listing reaches aspirants on time and with accuracy. His hands-on approach to operations and problem-solving has been instrumental in scaling CareerSetu's reach across India. Aman's motto is simple — small disciplined steps every single day lead to extraordinary results, and that philosophy drives the entire CareerSetu team forward.
+              </p>
+              <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.8 }}>
+                📞 7505369015 &nbsp;|&nbsp; ✉️ amansahuxy@gmail.com<br />
+                📍 Bareilly, Uttar Pradesh, India
               </p>
             </div>
           </div>
