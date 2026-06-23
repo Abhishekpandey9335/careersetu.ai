@@ -3,6 +3,7 @@ import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import ScrollToTop from './components/ScrollToTop';
 import Lectures from './pages/Lectures';
 
 // Pages
@@ -43,6 +44,7 @@ export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <ScrollToTop />
         <Routes>
           {/* Auth pages — no layout */}
           <Route path="/login" element={<Login />} />
@@ -104,11 +106,11 @@ export default function App() {
             }
           />
 
-      {/* Lectures page */}
-                <Route path="/lectures" element={<Layout><Lectures /></Layout>} />
+          {/* Lectures page */}
+          <Route path="/lectures" element={<Layout><Lectures /></Layout>} />
 
-                {/* Catch all */}
-                <Route path="*" element={<Layout><NotFound /></Layout>} />
+          {/* Catch all */}
+          <Route path="*" element={<Layout><NotFound /></Layout>} />
 
         </Routes>
       </BrowserRouter>
