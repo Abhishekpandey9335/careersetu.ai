@@ -42,13 +42,13 @@ export default function Navbar() {
   return (
     <nav className="navbar">
       <div className="navbar-inner">
-       <Link to="/" className="navbar-logo">
-                 <img src="/logo.png" alt="Btech Wale" className="logo-icon-img" />
-                 <div className="logo-text">
-                   <span className="logo-main">Btech Wale</span>
-                   <span className="logo-tagline">Your Career, Our Guidance</span>
-                 </div>
-               </Link>
+        <Link to="/" className="navbar-logo">
+          <div className="logo-icon">CS</div>
+          <div className="logo-text">
+            <span className="logo-main">CareerSetu</span>
+            <span className="logo-tagline">Your Career, Our Guidance</span>
+          </div>
+        </Link>
 
         <div className="navbar-links">
           {navLinks.map(link => (
