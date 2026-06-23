@@ -2,7 +2,7 @@
  * CareerSetu — Central API service
  * Base URL: /api  (proxied to http://localhost:8080/api in dev)
  * All authenticated requests automatically attach JWT from localStorage.
- * On 401, token is cleared and user is redirected to /login.
+ * On 401/403, token is refreshed (or cleared) and user is redirected to /login.
  */
 import axios from 'axios';
 
@@ -21,12 +21,13 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// ── Response interceptor: unwrap `data` field, handle 401 ──────────────────
+// ── Response interceptor: unwrap `data` field, handle 401/403 ──────────────
 api.interceptors.response.use(
   (response) => response.data,   // backend wraps everything in ApiResponse<T>; return whole object
   async (error) => {
     const status = error.response?.status;
-    if (status === 401) {
+
+    if (status === 401 || status === 403) {
       // Try refresh token once
       const refreshToken = localStorage.getItem('refreshToken');
       if (refreshToken && !error.config._retry) {
@@ -48,6 +49,7 @@ api.interceptors.response.use(
       localStorage.removeItem('user');
       window.location.href = '/login';
     }
+
     // Return a readable error message
     const message =
       error.response?.data?.message ||
