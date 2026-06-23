@@ -95,7 +95,7 @@ export default function AboutUs() {
           <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 24, color: 'var(--primary)' }}>🤝 Meet the Co-Founder & COO</h2>
           <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap' }}>
             <img
-              src="/DSC03653.JPG"
+              src="/DSC03653.JPG.jpeg"
               alt="Aman Sahu"
               style={{ width: 100, height: 100, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '3px solid var(--primary)' }}
             />
