@@ -151,17 +151,17 @@ export default function Home() {
           <div className="hero-grid">
             {/* Left */}
             <div className="hero-left fade-in-up">
-              <div className="hero-badge">
-                <Sparkles size={14} /> India's #1 AI-Powered Career Platform
-              </div>
-              <h1 className="hero-title">
-                India's Smartest<br />
-                <span className="gradient-text">Career Platform.</span>
-              </h1>
-              <p className="hero-subtitle">
-                From your first job to your dream role — get AI-powered guidance,<br />
-                curated opportunities, and proven roadmaps. All free.
-              </p>
+            <div className="hero-badge">
+                            <Sparkles size={14} /> 25,000+ Jobs Landed. You're Next.
+                          </div>
+                          <h1 className="hero-title">
+                            Naukri Sirf Sapna Nahi,<br />
+                            <span className="gradient-text">Ab Reality Hai.</span>
+                          </h1>
+                          <p className="hero-subtitle">
+                            AI jo samjhe tumhe, exams jo match kare tumhari taiyari,<br />
+                            roadmap jo le jaye seedha selection tak. Career banane ka asli raasta — yahan.
+                          </p>
               <div className="hero-stats">
                 {[['25K+', 'Exams'], ['15K+', 'Jobs'], ['5K+', 'Internships'], ['10K+', 'Study Materials']].map(([num, label]) => (
                   <div key={label} className="hero-stat">
