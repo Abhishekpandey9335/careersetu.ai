@@ -3,6 +3,7 @@ import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import Lectures from './pages/Lectures';
 
 // Pages
 import Home from './pages/Home';
@@ -103,8 +104,12 @@ export default function App() {
             }
           />
 
-          {/* Catch all */}
-          <Route path="*" element={<Layout><NotFound /></Layout>} />
+      {/* Lectures page */}
+                <Route path="/lectures" element={<Layout><Lectures /></Layout>} />
+
+                {/* Catch all */}
+                <Route path="*" element={<Layout><NotFound /></Layout>} />
+
         </Routes>
       </BrowserRouter>
     </AuthProvider>
