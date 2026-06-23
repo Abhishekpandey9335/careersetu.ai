@@ -45,26 +45,6 @@ export default function Footer() {
           </div>
 
           <div className="footer-col">
-            <h4>Explore</h4>
-            <Link to="/govt-exams">Govt Exams</Link>
-            <Link to="/private-jobs">Private Jobs</Link>
-            <Link to="/internships">Internships</Link>
-            <Link to="/study-material">Study Material</Link>
-            <Link to="/roadmaps">Roadmaps</Link>
-            <Link to="/results">Results</Link>
-          </div>
-
-          <div className="footer-col">
-            <h4>Resources</h4>
-            <Link to="/study-material">Syllabus</Link>
-            <Link to="/study-material">Previous Papers</Link>
-            <Link to="/study-material">Mock Tests</Link>
-            <Link to="/study-material">E-Books</Link>
-            <Link to="/study-material">Notes & PDFs</Link>
-            <Link to="/study-material">Video Lectures</Link>
-          </div>
-
-          <div className="footer-col">
             <h4>Company</h4>
             <Link to="/about">About Us</Link>
             <Link to="/contact">Contact Us</Link>
