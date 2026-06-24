@@ -90,28 +90,6 @@ export default function AboutUs() {
           </div>
         </div>
 
-        {/* Co-Founder */}
-        <div className="card" style={{ padding: 32, marginBottom: 24 }}>
-          <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 24, color: 'var(--primary)' }}>🤝 Meet the Co-Founder & COO</h2>
-          <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-            <img
-              src="/DSC03653.JPG.jpeg"
-              alt="Aman Sahu"
-              style={{ width: 100, height: 100, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '3px solid var(--primary)' }}
-            />
-            <div style={{ flex: 1, minWidth: 200 }}>
-              <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>Aman Sahu</h3>
-              <p style={{ color: 'var(--primary)', fontSize: 14, marginBottom: 12 }}>Co-Founder & COO, CareerSetu | Bareilly, Uttar Pradesh, India</p>
-              <p style={{ fontSize: 14, lineHeight: 1.8, color: 'var(--text-muted)', marginBottom: 12 }}>
-                Aman Sahu brings a sharp operational mindset and unwavering dedication to CareerSetu's day-to-day growth. Hailing from Bareilly, Uttar Pradesh, Aman has always believed that consistent execution is what turns a vision into reality. As Co-Founder & COO, he ensures that every student-facing feature, every exam update, and every job listing reaches aspirants on time and with accuracy. His hands-on approach to operations and problem-solving has been instrumental in scaling CareerSetu's reach across India. Aman's motto is simple — small disciplined steps every single day lead to extraordinary results, and that philosophy drives the entire CareerSetu team forward.
-              </p>
-              <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.8 }}>
-                📞 7505369015 &nbsp;|&nbsp; ✉️ amansahuxy@gmail.com<br />
-                📍 Bareilly, Uttar Pradesh, India
-              </p>
-            </div>
-          </div>
-        </div>
 
         {/* Contact CTA */}
         <div style={{ background: 'linear-gradient(135deg, #1a56db, #7e3af2)', borderRadius: 16, padding: 32, textAlign: 'center', color: 'white' }}>
