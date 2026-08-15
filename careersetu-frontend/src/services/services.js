@@ -115,6 +115,7 @@ export const aiService = {
     formData.append('file', file);
     return api.post('/ai/resume/upload', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
+          timeout: 60000,
     });
   },
   getConversations: () => api.get('/ai/conversations'),
