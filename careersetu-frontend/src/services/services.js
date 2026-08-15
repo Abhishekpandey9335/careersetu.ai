@@ -1,4 +1,4 @@
-﻿import api from './api';
+import api from './api';
 
 
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -110,6 +110,13 @@ export const aiService = {
   interviewCoach: (payload) => api.post('/ai/interview-coach', payload),
   careerGps: (targetSalary, targetYears = 2) =>
     api.get('/ai/career-gps', { params: { targetSalary, targetYears } }),
+  uploadResume: (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/ai/resume/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
   getConversations: () => api.get('/ai/conversations'),
   deleteConversation: (id) => api.delete(`/ai/conversations/${id}`),
 };

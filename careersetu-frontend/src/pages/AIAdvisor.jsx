@@ -4,7 +4,7 @@
  */
 import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Send, Sparkles, Bot, User, Download, RefreshCw, ChevronRight, LogIn } from 'lucide-react';
+import { Send, Sparkles, Bot, User, Download, RefreshCw, ChevronRight, LogIn, Paperclip } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { aiService } from '../services/services';
 import './AIAdvisor.css';
@@ -49,6 +49,8 @@ export default function AIAdvisor() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
+  const fileInputRef = useRef(null);
+  const [resumeUploading, setResumeUploading] = useState(false);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -90,6 +92,25 @@ export default function AIAdvisor() {
       ]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResumeUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!isLoggedIn) { navigate('/login'); return; }
+
+    setResumeUploading(true);
+    setMessages((prev) => [...prev, { role: 'user', text: `Uploaded resume: ${file.name}` }]);
+    try {
+      const res = await aiService.uploadResume(file);
+      const aiData = res.data;
+      setMessages((prev) => [...prev, { role: 'ai', text: aiData.reply || aiData.message || 'Resume analyzed successfully!' }]);
+    } catch (err) {
+      setMessages((prev) => [...prev, { role: 'ai', text: `Sorry, resume upload failed: ${err.message}` }]);
+    } finally {
+      setResumeUploading(false);
+      e.target.value = '';
     }
   };
 
@@ -238,6 +259,10 @@ export default function AIAdvisor() {
                   disabled={!isLoggedIn}
                 />
                 <div className="chat-input-actions">
+                  <input type="file" ref={fileInputRef} style={{ display: "none" }} accept=".pdf,.doc,.docx" onChange={handleResumeUpload} />
+                  <button className="icon-btn" type="button" title="Upload resume" onClick={() => fileInputRef.current.click()} disabled={resumeUploading || !isLoggedIn}>
+                    <Paperclip size={16} />
+                  </button>
                   <button
                     className={`chat-send-btn ${input.trim() ? 'active' : ''}`}
                     onClick={() => sendMessage()}
