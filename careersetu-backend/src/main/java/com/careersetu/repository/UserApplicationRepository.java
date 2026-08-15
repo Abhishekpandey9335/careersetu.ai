@@ -1,4 +1,4 @@
-package com.careersetu.repository;
+﻿package com.careersetu.repository;
 
 import com.careersetu.entity.UserApplication;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,5 +10,4 @@ import java.util.List;
 public interface UserApplicationRepository extends JpaRepository<UserApplication, Long> {
     List<UserApplication> findByUserIdOrderByAppliedAtDesc(Long userId);
     boolean existsByUserIdAndJobId(Long userId, Long jobId);
-    boolean existsByUserIdAndExamId(Long userId, Long examId);
 }

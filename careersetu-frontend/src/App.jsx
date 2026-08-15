@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+﻿import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
@@ -8,14 +8,11 @@ import Lectures from './pages/Lectures';
 
 // Pages
 import Home from './pages/Home';
-import GovtExams from './pages/GovtExams';
-import ExamDetail from './pages/ExamDetail';
 import PrivateJobs from './pages/PrivateJobs';
 import Internships from './pages/Internships';
 import LearnHub from './pages/LearnHub';
 import AIAdvisor from './pages/AIAdvisor';
 import Dashboard from './pages/Dashboard';
-import EligibilityChecker from './pages/EligibilityChecker';
 import CompanyExplorer from './pages/CompanyExplorer';
 import CompanyDetail from './pages/CompanyDetail';
 import SalaryExplorer from './pages/SalaryExplorer';
@@ -46,27 +43,22 @@ export default function App() {
       <BrowserRouter>
         <ScrollToTop />
         <Routes>
-          {/* Auth pages — no layout */}
+          {/* Auth pages */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
           {/* Public pages */}
           <Route path="/" element={<Layout><Home /></Layout>} />
-          <Route path="/govt-exams" element={<Layout><GovtExams /></Layout>} />
-          <Route path="/exam/:slug" element={<Layout><ExamDetail /></Layout>} />
           <Route path="/private-jobs" element={<Layout><PrivateJobs /></Layout>} />
           <Route path="/internships" element={<Layout><Internships /></Layout>} />
 
-          {/* LearnHub — replaces /study-material, /roadmaps, /resources */}
+          {/* LearnHub */}
           <Route path="/learn" element={<Layout><LearnHub /></Layout>} />
-
-          {/* Old URLs redirect to LearnHub (backward compat) */}
           <Route path="/study-material" element={<Layout><LearnHub /></Layout>} />
           <Route path="/roadmaps" element={<Layout><LearnHub /></Layout>} />
           <Route path="/roadmap/:slug" element={<Layout><LearnHub /></Layout>} />
           <Route path="/resources" element={<Layout><LearnHub /></Layout>} />
 
-          <Route path="/eligibility-checker" element={<Layout><EligibilityChecker /></Layout>} />
           <Route path="/company-explorer" element={<Layout><CompanyExplorer /></Layout>} />
           <Route path="/companies" element={<Layout><CompanyExplorer /></Layout>} />
           <Route path="/company/:slug" element={<Layout><CompanyDetail /></Layout>} />
@@ -96,7 +88,7 @@ export default function App() {
             }
           />
 
-          {/* Admin panel — protected */}
+          {/* Admin panel */}
           <Route
             path="/admin"
             element={

@@ -52,7 +52,7 @@ public class Job {
     private LocalDate expiresAt;
 
     public enum JobType {
-        GOVT, PRIVATE, INTERNSHIP
+        PRIVATE, INTERNSHIP
     }
 
     public enum JobStatus {

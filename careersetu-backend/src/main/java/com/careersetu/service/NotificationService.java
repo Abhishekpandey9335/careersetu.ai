@@ -1,4 +1,4 @@
-package com.careersetu.service;
+﻿package com.careersetu.service;
 
 import com.careersetu.entity.*;
 import com.careersetu.exception.ResourceNotFoundException;
@@ -7,9 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -54,20 +51,5 @@ public class NotificationService {
                 .relatedEntityId(entityId).relatedEntityType(entityType)
                 .build();
         notificationRepository.save(n);
-    }
-
-    // Called by scheduler: notify all users subscribed to an exam when its status changes
-    @Transactional
-    public void broadcastExamNotification(List<Long> userIds, Notification.NotificationType type,
-                                           String title, String message, Long examId) {
-        List<Notification> notifications = userIds.stream().map(uid ->
-                userRepository.findById(uid).map(user ->
-                        Notification.builder().user(user).type(type)
-                                .title(title).message(message)
-                                .relatedEntityId(examId).relatedEntityType("EXAM")
-                                .build()
-                ).orElse(null)
-        ).filter(n -> n != null).collect(Collectors.toList());
-        notificationRepository.saveAll(notifications);
     }
 }

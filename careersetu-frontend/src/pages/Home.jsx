@@ -1,19 +1,14 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { 
-  ArrowRight, ChevronRight, Sparkles, Bot, Send, 
-  CheckCircle, TrendingUp, MapPin, Briefcase, Calendar, Clock
+import {
+  ArrowRight, ChevronRight, Sparkles, Bot, Send,
+  CheckCircle, TrendingUp, MapPin, Briefcase, Clock
 } from 'lucide-react';
 import {
-  govtExams, privateJobs, roadmaps, companies,
-  successStories, upcomingDates, quickLinksData
+  privateJobs, roadmaps, companies,
+  successStories, quickLinksData
 } from '../data/mockData';
 import './Home.css';
-
-const categoryIcons = {
-  SSC: '🏛️', UPSC: '⚖️', BANKING: '🏦', RAILWAY: '🚂',
-  STATE_PSC: '📋', DEFENCE: '🎖️', TEACHING: '👩‍🏫', POLICE: '👮', INSURANCE: '🛡️'
-};
 
 const companyColors = {
   TCS: '#3b5998', Infosys: '#007bff', Wipro: '#5ba3e0',
@@ -22,41 +17,8 @@ const companyColors = {
 };
 
 function formatSalary(min, max) {
-  const fmt = (v) => v >= 100000 ? `₹${(v/100000).toFixed(0)}L` : `₹${(v/1000).toFixed(0)}K`;
+  const fmt = (v) => v >= 100000 ? `${(v/100000).toFixed(0)}L` : `${(v/1000).toFixed(0)}K`;
   return `${fmt(min)} - ${fmt(max)}`;
-}
-
-function ExamCard({ exam }) {
-  const icon = categoryIcons[exam.category] || '📝';
-  const isActive = exam.status === 'ACTIVE';
-  return (
-    <div className="exam-card card">
-      <div className="exam-card-header">
-        <div className="exam-icon">{icon}</div>
-        <span className={`badge ${isActive ? 'badge-success' : 'badge-yellow'}`}>
-          {isActive ? 'Active' : 'Upcoming'}
-        </span>
-      </div>
-      <h3 className="exam-name">{exam.name}</h3>
-      <div className="exam-meta">
-        <div className="exam-meta-row">
-          <span className="meta-label">Vacancy</span>
-          <span className="meta-value highlight">{exam.vacancy?.toLocaleString()}</span>
-        </div>
-        <div className="exam-meta-row">
-          <span className="meta-label">Last Date</span>
-          <span className="meta-value">{exam.formEnd}</span>
-        </div>
-        <div className="exam-meta-row">
-          <span className="meta-label">Salary</span>
-          <span className="meta-value">{formatSalary(exam.salaryMin, exam.salaryMax)}</span>
-        </div>
-      </div>
-      <Link to={`/exam/${exam.slug}`} className="btn btn-primary btn-sm apply-btn">
-        Apply Now <ArrowRight size={13} />
-      </Link>
-    </div>
-  );
 }
 
 function JobCard({ job }) {
@@ -94,8 +56,8 @@ function JobCard({ job }) {
 
 function AiWidget() {
   const [messages, setMessages] = useState([
-    { role: 'user', text: 'Which exams can I apply for after B.Sc Computer Science?' },
-    { role: 'ai', text: 'Based on your profile, here are some best exams you can apply:\n• SSC CGL\n• IBPS PO\n• TCS NQT\n• State PSC Exams\n• And 15 more...' }
+    { role: 'user', text: 'Mujhe backend developer banna hai, kaunsi skills seekhun?' },
+    { role: 'ai', text: 'Aapke profile ke hisaab se:\n• Java + Spring Boot\n• SQL Databases\n• REST APIs\n• Docker basics\n• System Design fundamentals' }
   ]);
   const [input, setInput] = useState('');
   const navigate = useNavigate();
@@ -141,29 +103,26 @@ function AiWidget() {
 }
 
 export default function Home() {
-  const navigate = useNavigate();
-
   return (
     <div className="home">
       {/* Hero */}
       <section className="hero">
         <div className="container">
           <div className="hero-grid">
-            {/* Left */}
             <div className="hero-left fade-in-up">
-            <div className="hero-badge">
-                            <Sparkles size={14} /> 25,000+ Jobs Landed. You're Next.
-                          </div>
-                          <h1 className="hero-title">
-                            Naukri Sirf Sapna Nahi,<br />
-                            <span className="gradient-text">Ab Reality Hai.</span>
-                          </h1>
-                          <p className="hero-subtitle">
-                            AI jo samjhe tumhe, exams jo match kare tumhari taiyari,<br />
-                            roadmap jo le jaye seedha selection tak. Career banane ka asli raasta — yahan.
-                          </p>
+              <div className="hero-badge">
+                <Sparkles size={14} /> 25,000+ Careers Matched. You're Next.
+              </div>
+              <h1 className="hero-title">
+                Naukri Sirf Sapna Nahi,<br />
+                <span className="gradient-text">Ab Reality Hai.</span>
+              </h1>
+              <p className="hero-subtitle">
+                AI jo samjhe tumhe, jobs jo match kare tumhari skills se,<br />
+                roadmap jo le jaye seedha selection tak. Career banane ka asli raasta — yahan.
+              </p>
               <div className="hero-stats">
-                {[['25K+', 'Exams'], ['15K+', 'Jobs'], ['5K+', 'Internships'], ['10K+', 'Study Materials']].map(([num, label]) => (
+                {[['15K+', 'Jobs'], ['5K+', 'Internships'], ['500+', 'Companies'], ['10K+', 'Study Materials']].map(([num, label]) => (
                   <div key={label} className="hero-stat">
                     <span className="hero-stat-num">{num}</span>
                     <span className="hero-stat-label">{label}</span>
@@ -171,26 +130,24 @@ export default function Home() {
                 ))}
               </div>
               <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 16 }}>
-                <Link to="/govt-exams" className="btn btn-primary btn-lg">
-                  🏛️ Explore Govt Jobs <ArrowRight size={16} />
+                <Link to="/private-jobs" className="btn btn-primary btn-lg">
+                  💼 Find Private Jobs <ArrowRight size={16} />
                 </Link>
-                <Link to="/private-jobs" className="btn btn-outline btn-lg">
-                  💼 Find Private Jobs
+                <Link to="/ai-advisor" className="btn btn-outline btn-lg">
+                  🤖 Get My Career Match
                 </Link>
               </div>
             </div>
 
-            {/* Right — Feature Cards */}
             <div className="hero-right fade-in-up" style={{ animationDelay: '0.1s' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                 {[
-                  { icon: '🏛️', title: 'Govt Exams', desc: '25,000+ notifications', color: '#1a56db', path: '/govt-exams' },
                   { icon: '💼', title: 'Private Jobs', desc: '15,000+ openings', color: '#7e3af2', path: '/private-jobs' },
                   { icon: '🎓', title: 'Internships', desc: '5,000+ opportunities', color: '#0e9f6e', path: '/internships' },
                   { icon: '🤖', title: 'AI Advisor', desc: 'Personalized guidance', color: '#f59e0b', path: '/ai-advisor' },
                   { icon: '🎯', title: 'Strategies', desc: 'PDFs · Roadmaps · Resources', color: '#ef4444', path: '/learn' },
                   { icon: '📊', title: 'Companies', desc: 'Top company insights', color: '#0ea5e9', path: '/company-explorer' },
-
+                  { icon: '▶️', title: 'Lectures', desc: 'Free & Premium Videos', color: '#1a56db', path: '/lectures' },
                 ].map(item => (
                   <Link key={item.title} to={item.path} style={{ textDecoration: 'none' }}>
                     <div style={{
@@ -214,7 +171,6 @@ export default function Home() {
                 ))}
               </div>
 
-              {/* AI Banner */}
               <div style={{
                 marginTop: 16,
                 background: 'linear-gradient(135deg, #1a56db 0%, #7e3af2 100%)',
@@ -228,7 +184,7 @@ export default function Home() {
               }}>
                 <div>
                   <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 4 }}>🤖 Try AI Career Advisor</div>
-                  <div style={{ fontSize: 13, opacity: 0.9 }}>Get personalized career recommendations in seconds</div>
+                  <div style={{ fontSize: 13, opacity: 0.9 }}>Get personalized job & career recommendations in seconds</div>
                 </div>
                 <Link to="/ai-advisor" className="btn" style={{ background: 'white', color: '#1a56db', fontWeight: 700, whiteSpace: 'nowrap', padding: '8px 16px', borderRadius: 8, fontSize: 13 }}>
                   Try Now →
@@ -260,17 +216,8 @@ export default function Home() {
         <div className="container">
           <div className="home-main-grid">
             <div className="home-left">
-              {/* Govt Jobs */}
-              <div className="section-header">
-                <h2 className="section-title">Latest Govt Job Openings</h2>
-                <Link to="/govt-exams" className="section-link">View All <ChevronRight size={14} /></Link>
-              </div>
-              <div className="exam-cards-scroll">
-                {govtExams.slice(0, 5).map(exam => <ExamCard key={exam.id} exam={exam} />)}
-              </div>
-
               {/* Private Jobs */}
-              <div className="section-header" style={{marginTop: 40}}>
+              <div className="section-header">
                 <h2 className="section-title">Latest Private Job Openings</h2>
                 <Link to="/private-jobs" className="section-link">View All <ChevronRight size={14} /></Link>
               </div>
@@ -278,46 +225,8 @@ export default function Home() {
                 {privateJobs.map(job => <JobCard key={job.id} job={job} />)}
               </div>
 
-              {/* Eligibility + Salary + Company Readiness */}
+              {/* Salary + Company Readiness */}
               <div className="widgets-row" style={{marginTop: 40}}>
-                <div className="widget-card card-flat">
-                  <h3 className="widget-title">Eligibility Checker</h3>
-                  <p className="widget-sub">Check all exams you are eligible for</p>
-                  <div className="form-group">
-                    <label className="label">Age</label>
-                    <select className="input select"><option>Select Age</option>
-                      {Array.from({length: 20}, (_, i) => i + 18).map(a => <option key={a}>{a}</option>)}
-                    </select>
-                  </div>
-                  <div className="form-group">
-                    <label className="label">Qualification</label>
-                    <select className="input select"><option>Select Qualification</option>
-                      <option>Class 10</option><option>Class 12</option><option>Graduation</option>
-                    </select>
-                  </div>
-                  <div className="form-group">
-                    <label className="label">State</label>
-                    <select className="input select"><option>Select State</option>
-                      <option>Uttar Pradesh</option><option>Bihar</option><option>Maharashtra</option>
-                    </select>
-                  </div>
-                  <div className="form-group">
-                    <label className="label">Category</label>
-                    <select className="input select"><option>Select Category</option>
-                      <option>General</option><option>OBC</option><option>SC/ST</option>
-                    </select>
-                  </div>
-                  <div className="eligibility-result">
-                    <CheckCircle size={14} style={{color:'var(--secondary)'}} /> <strong>27 Exams Found</strong>
-                    <div className="eligibility-list">
-                      <span>• SSC CGL</span><span>• IBPS PO</span><span>• Bank PO</span>
-                      <span>• Railway Group D</span><span>• And 23 more exams</span>
-                    </div>
-                    <Link to="/eligibility-checker" className="section-link" style={{marginTop:8}}>View All Eligible Exams →</Link>
-                  </div>
-                  <Link to="/eligibility-checker" className="btn btn-primary w-full" style={{justifyContent:'center',marginTop:12}}>Check Eligible Exams</Link>
-                </div>
-
                 <div className="widget-card card-flat">
                   <h3 className="widget-title">Salary Explorer</h3>
                   <p className="widget-sub">Explore salary, growth & more</p>
@@ -328,8 +237,8 @@ export default function Home() {
                   <div className="salary-result">
                     <div className="salary-job-title">Software Engineer</div>
                     <div className="salary-avg">Average Salary</div>
-                    <div className="salary-amount">₹6.5 LPA</div>
-                    <div className="salary-range">Freshers: ₹3.5 LPA &nbsp;•&nbsp; Experienced: ₹15 LPA</div>
+                    <div className="salary-amount">6.5 LPA</div>
+                    <div className="salary-range">Freshers: 3.5 LPA &nbsp;•&nbsp; Experienced: 15 LPA</div>
                     <div className="salary-tags">
                       <span className="badge badge-success"><TrendingUp size={11} /> Growth: High</span>
                       <span className="badge badge-primary">Job Security: High</span>
@@ -367,12 +276,12 @@ export default function Home() {
               </div>
               <div className="study-material-grid">
                 {[
-                  { icon: '📖', label: 'Syllabus', sub: 'All Exams Syllabus', path: '/study-material', color: '#1a56db' },
-                  { icon: '📝', label: 'Previous Papers', sub: 'PYQ with Solutions', path: '/study-material', color: '#7e3af2' },
-                  { icon: '📊', label: 'Mock Tests', sub: 'Mock Tests & Quizzes', path: '/study-material', color: '#0e9f6e' },
-                  { icon: '📒', label: 'Notes & PDFs', sub: 'Handwritten Notes', path: '/study-material', color: '#f59e0b' },
+                  { icon: '📝', label: 'Interview Questions', sub: 'Company-wise Q&A', path: '/study-material', color: '#7e3af2' },
+                  { icon: '📊', label: 'Mock Tests', sub: 'Practice Tests & Quizzes', path: '/study-material', color: '#0e9f6e' },
+                  { icon: '📒', label: 'Notes & PDFs', sub: 'Skill-based Notes', path: '/study-material', color: '#f59e0b' },
                   { icon: '▶️', label: 'Video Lectures', sub: 'Free & Premium Videos', path: '/study-material', color: '#ef4444' },
                   { icon: '📚', label: 'E-Books', sub: 'Books for Preparation', path: '/study-material', color: '#0ea5e9' },
+                  { icon: '🗺️', label: 'Roadmaps', sub: 'Skill-building Paths', path: '/roadmaps', color: '#1a56db' },
                 ].map(item => (
                   <Link key={item.label} to={item.path} className="study-item card">
                     <div className="study-item-icon" style={{background: item.color + '15', color: item.color}}>{item.icon}</div>
@@ -393,7 +302,7 @@ export default function Home() {
                     <div className="roadmap-icon">🗺️</div>
                     <h3 className="roadmap-title">{rm.title}</h3>
                     <div className="roadmap-meta">
-                      <span><Clock size={12} /> {rm.durationWeeks} Months Plan</span>
+                      <span><Clock size={12} /> {rm.durationWeeks} Weeks Plan</span>
                       <span className={`badge ${rm.difficulty === 'HARD' ? 'badge-red' : rm.difficulty === 'MEDIUM' ? 'badge-yellow' : 'badge-success'}`}>
                         {rm.difficulty}
                       </span>
@@ -406,7 +315,6 @@ export default function Home() {
               {/* Success Stories */}
               <div className="section-header" style={{marginTop:40}}>
                 <h2 className="section-title">Success Stories</h2>
-                <Link to="/success-stories" className="section-link">View All →</Link>
               </div>
               <p style={{color:'var(--text-muted)',fontSize:13,marginBottom:16}}>Real stories from real achievers</p>
               <div className="success-grid">
@@ -431,8 +339,8 @@ export default function Home() {
                     { icon: '🎯', title: 'All in One Platform', sub: 'Everything in one place' },
                     { icon: '🤖', title: 'AI Powered Guidance', sub: 'Smart AI recommendations' },
                     { icon: '📌', title: 'Personalized Roadmaps', sub: 'Tailored to your profile' },
-                    { icon: '✅', title: 'Expert Content', sub: 'Verified by toppers' },
-                    { icon: '❤️', title: 'Trusted by Millions', sub: '50L+ students' },
+                    { icon: '✅', title: 'Expert Content', sub: 'Verified by industry pros' },
+                    { icon: '❤️', title: 'Trusted by Thousands', sub: 'Growing student community' },
                     { icon: '🆓', title: '100% Free to Get Started', sub: 'No credit card needed' },
                   ].map(w => (
                     <div key={w.title} className="why-item card">
@@ -448,24 +356,6 @@ export default function Home() {
             {/* Right sidebar */}
             <div className="home-right">
               <AiWidget />
-              <div className="card-flat sidebar-card" style={{marginTop:20}}>
-                <div className="sidebar-card-header">
-                  <Calendar size={15} style={{color:'var(--primary)'}} />
-                  <span>Upcoming Exam Calendar</span>
-                  <Link to="/exam-calendar" className="section-link" style={{marginLeft:'auto',fontSize:12}}>View All</Link>
-                </div>
-                <div className="calendar-list">
-                  {upcomingDates.map((d, i) => (
-                    <div key={i} className="calendar-item">
-                      <div className={`calendar-dot ${d.type === 'exam' ? 'exam' : 'notification'}`}></div>
-                      <div className="calendar-info">
-                        <div className="calendar-exam">{d.exam}</div>
-                        <div className="calendar-date">{d.date}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
               <div className="premium-sidebar card" style={{marginTop:20}}>
                 <div className="premium-crown">👑</div>
                 <h3>Go Premium</h3>
@@ -482,7 +372,7 @@ export default function Home() {
               </div>
               <div className="subscribe-sidebar card-flat" style={{marginTop:20}}>
                 <h3>Get Important Updates</h3>
-                <p>Never miss any important updates and notifications</p>
+                <p>Never miss any important job or internship alert</p>
                 <div style={{display:'flex',gap:8,marginTop:12}}>
                   <input className="input" placeholder="Enter your email" style={{flex:1}} />
                   <button className="btn btn-primary btn-sm">Subscribe</button>
@@ -499,14 +389,14 @@ export default function Home() {
           <div className="cta-grid">
             <div>
               <h2>Ready to Build Your Dream Career?</h2>
-              <p>Join millions of students who are already achieving their goals with CareerSetu...</p>
+              <p>Join thousands of students who are already achieving their goals with CareerSetu...</p>
               <Link to="/register" className="btn btn-accent btn-lg" style={{marginTop:20}}>
                 Get Started For Free <ArrowRight size={16} />
               </Link>
             </div>
             <div className="cta-right">
               <h3>Get Important Updates</h3>
-              <p>Never miss any important updates and notifications</p>
+              <p>Never miss any important job or internship alert</p>
               <div className="cta-subscribe">
                 <input className="input" placeholder="Enter your email" />
                 <button className="btn btn-primary">Subscribe</button>

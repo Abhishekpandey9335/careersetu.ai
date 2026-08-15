@@ -1,4 +1,4 @@
-package com.careersetu.controller;
+﻿package com.careersetu.controller;
 
 import com.careersetu.dto.studymaterial.StudyMaterialDto;
 import com.careersetu.entity.StudyMaterial;
@@ -30,13 +30,12 @@ public class StudyMaterialController {
     @GetMapping
     @Operation(summary = "Browse study materials with optional filters")
     public ResponseEntity<ApiResponse<Page<StudyMaterialDto>>> filter(
-            @RequestParam(required = false) Long examId,
             @RequestParam(required = false) StudyMaterial.MaterialType type,
             @RequestParam(required = false) Boolean premium,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         return ResponseEntity.ok(ApiResponse.success(
-                studyMaterialService.filter(examId, type, premium, page, size)));
+                studyMaterialService.filter(type, premium, page, size)));
     }
 
     @GetMapping("/{id}")
@@ -53,14 +52,13 @@ public class StudyMaterialController {
     @Operation(summary = "Upload a study material (Admin only)", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<ApiResponse<StudyMaterialDto>> create(
             @RequestParam String title,
-            @RequestParam(required = false) Long examId,
             @RequestParam(required = false) String subject,
             @RequestParam StudyMaterial.MaterialType type,
             @RequestParam String fileUrl,
             @RequestParam(defaultValue = "false") boolean isPremium) {
         Long uploaderId = userRepository.findByEmail(SecurityUtil.getCurrentEmail()).orElseThrow().getId();
         return ResponseEntity.status(201).body(ApiResponse.success("Uploaded",
-                studyMaterialService.create(title, examId, subject, type, fileUrl, isPremium, uploaderId)));
+                studyMaterialService.create(title, subject, type, fileUrl, isPremium, uploaderId)));
     }
 
     @DeleteMapping("/{id}")

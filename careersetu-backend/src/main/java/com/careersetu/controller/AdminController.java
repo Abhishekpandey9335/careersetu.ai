@@ -1,4 +1,4 @@
-package com.careersetu.controller;
+﻿package com.careersetu.controller;
 
 import com.careersetu.entity.Subscription;
 import com.careersetu.entity.User;
@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 public class AdminController {
 
     private final UserRepository userRepository;
-    private final ExamRepository examRepository;
     private final JobRepository jobRepository;
     private final StudyMaterialRepository studyMaterialRepository;
     private final SubscriptionRepository subscriptionRepository;
@@ -38,7 +37,6 @@ public class AdminController {
     public ResponseEntity<ApiResponse<Map<String, Object>>> getStats() {
         Map<String, Object> stats = new HashMap<>();
         stats.put("totalUsers",           userRepository.count());
-        stats.put("totalExams",           examRepository.count());
         stats.put("totalJobs",            jobRepository.count());
         stats.put("totalStudyMaterials",  studyMaterialRepository.count());
         stats.put("totalSubscriptions",   subscriptionRepository.count());
@@ -93,3 +91,4 @@ public class AdminController {
         return ResponseEntity.ok(ApiResponse.success(subscriptionService.rejectSubscription(id)));
     }
 }
+

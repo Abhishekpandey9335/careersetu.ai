@@ -1,4 +1,4 @@
-package com.careersetu.controller;
+﻿package com.careersetu.controller;
 
 import com.careersetu.dto.roadmap.RoadmapDto;
 import com.careersetu.exception.ApiResponse;
@@ -29,11 +29,5 @@ public class RoadmapController {
     @Operation(summary = "Get roadmap by slug")
     public ResponseEntity<ApiResponse<RoadmapDto>> getBySlug(@PathVariable String slug) {
         return ResponseEntity.ok(ApiResponse.success(roadmapService.getBySlug(slug)));
-    }
-
-    @GetMapping("/exam/{examId}")
-    @Operation(summary = "Get all roadmaps for a specific exam")
-    public ResponseEntity<ApiResponse<List<RoadmapDto>>> getByExam(@PathVariable Long examId) {
-        return ResponseEntity.ok(ApiResponse.success(roadmapService.getByExam(examId)));
     }
 }

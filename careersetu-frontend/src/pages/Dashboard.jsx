@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, BookOpen, Briefcase, Bell, Target,
-  CheckCircle, Flame, Trophy, ChevronRight, Sparkles, Crown,
+  CheckCircle, Flame, Trophy, Sparkles, Crown,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { dashboardService, notificationService } from '../services/services';
@@ -186,8 +186,6 @@ export default function Dashboard() {
   const applications  = dashboard?.applications || [];
   const appStats      = dashboard?.applicationStats || {};
   const notifications = dashboard?.recentNotifications || [];
-  const upcomingExams = dashboard?.upcomingDeadlines || [];
-  const bookmarks     = dashboard?.bookmarks || {};
 
   const displayName = profile.name || user?.name || 'Student';
 
@@ -199,7 +197,7 @@ export default function Dashboard() {
             <div>
               <h1 className="dh-title">Welcome back, {displayName}! 👋</h1>
               <p className="dh-sub">
-                {profile.qualification || 'Student'} • Goal: {profile.targetExam || 'Career Growth'}
+                {profile.qualification || 'Student'} • Goal: {profile.careerGoal || 'Career Growth'}
               </p>
             </div>
             <div className="dh-stats">
@@ -263,9 +261,9 @@ export default function Dashboard() {
                         {profile.todayTask || 'Ask your AI advisor for today\'s task'}
                       </h3>
                       <p className="adt-sub">
-                        {profile.targetExam
-                          ? `Based on your ${profile.targetExam} roadmap`
-                          : 'Set your target exam to get a personalized plan'}
+                        {profile.careerGoal
+                          ? `Based on your ${profile.careerGoal} roadmap`
+                          : 'Set your career goal to get a personalized plan'}
                       </p>
                     </div>
                   </div>
@@ -274,10 +272,10 @@ export default function Dashboard() {
 
                 <div className="dashboard-stats-grid">
                   {[
-                    { label: 'Exams Saved', val: bookmarks?.exams?.length || 0, icon: '📋', color: 'var(--primary)' },
                     { label: 'Jobs Applied', val: appStats?.applied || 0, icon: '💼', color: 'var(--secondary)' },
                     { label: 'Under Review', val: appStats?.underReview || 0, icon: '⏳', color: 'var(--purple)' },
                     { label: 'Selected', val: appStats?.selected || 0, icon: '✅', color: 'var(--accent)' },
+                    { label: 'Rejected', val: appStats?.rejected || 0, icon: '❌', color: '#e02424' },
                   ].map((s) => (
                     <div key={s.label} className="ds-stat-card card">
                       <div className="ds-stat-icon" style={{ color: s.color }}>{s.icon}</div>
@@ -285,61 +283,6 @@ export default function Dashboard() {
                       <div className="ds-stat-label">{s.label}</div>
                     </div>
                   ))}
-                </div>
-
-                <div className="dashboard-two-col">
-                  <div>
-                    <div className="section-header">
-                      <h2 className="section-title">📋 Saved Exams</h2>
-                      <Link to="/govt-exams" className="section-link">
-                        View All <ChevronRight size={14} />
-                      </Link>
-                    </div>
-                    <div className="saved-list">
-                      {(bookmarks?.exams || []).slice(0, 4).map((b) => (
-                        <div key={b.id} className="saved-item card">
-                          <div className="saved-item-main">
-                            <span className="saved-item-icon">📋</span>
-                            <div>
-                              <div className="saved-item-name">{b.examName || b.name}</div>
-                              <div className="saved-item-date">Saved</div>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                      {(!bookmarks?.exams?.length) && (
-                        <div className="empty-state" style={{ padding: '20px 0' }}>
-                          <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-                            No saved exams yet.{' '}
-                            <Link to="/govt-exams" style={{ color: 'var(--primary)' }}>
-                              Browse exams →
-                            </Link>
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="section-header">
-                      <h2 className="section-title">📅 Upcoming Deadlines</h2>
-                    </div>
-                    <div className="saved-list">
-                      {upcomingExams.slice(0, 5).map((e) => (
-                        <div key={e.id} className="deadline-item card">
-                          <div className="deadline-dot" style={{ background: 'var(--primary)' }} />
-                          <div style={{ flex: 1 }}>
-                            <div style={{ fontSize: 13, fontWeight: 600 }}>{e.name}</div>
-                            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{e.formEnd}</div>
-                          </div>
-                          <span className="badge badge-primary">Form</span>
-                        </div>
-                      ))}
-                      {!upcomingExams.length && (
-                        <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>No upcoming deadlines.</p>
-                      )}
-                    </div>
-                  </div>
                 </div>
               </div>
             )}
@@ -353,10 +296,7 @@ export default function Dashboard() {
                     <div className="empty-icon">📝</div>
                     <h3>No applications yet</h3>
                     <p>
-                      <Link to="/govt-exams" className="btn btn-primary btn-sm" style={{ marginRight: 8 }}>
-                        Browse Exams
-                      </Link>
-                      <Link to="/private-jobs" className="btn btn-outline btn-sm">Browse Jobs</Link>
+                      <Link to="/private-jobs" className="btn btn-primary btn-sm">Browse Jobs</Link>
                     </p>
                   </div>
                 ) : (
@@ -373,11 +313,9 @@ export default function Dashboard() {
                           const s = statusConfig[app.status] || statusConfig.APPLIED;
                           return (
                             <tr key={app.id}>
-                              <td style={{ fontWeight: 600 }}>{app.examName || app.jobTitle || app.name}</td>
+                              <td style={{ fontWeight: 600 }}>{app.jobTitle || app.name}</td>
                               <td>
-                                <span className={`badge ${app.type === 'EXAM' ? 'badge-primary' : 'badge-purple'}`}>
-                                  {app.type === 'EXAM' ? 'Govt' : 'Private'}
-                                </span>
+                                <span className="badge badge-purple">Private</span>
                               </td>
                               <td style={{ color: 'var(--text-muted)', fontSize: 13 }}>
                                 {new Date(app.createdAt || app.appliedDate).toLocaleDateString('en-IN')}

@@ -1,4 +1,4 @@
-package com.careersetu.entity;
+﻿package com.careersetu.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -17,10 +17,6 @@ public class StudyMaterial {
 
     @Column(nullable = false)
     private String title;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "exam_id")
-    private Exam exam;
 
     private String subject;
 

@@ -1,4 +1,4 @@
-package com.careersetu.entity;
+﻿package com.careersetu.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -19,10 +19,6 @@ public class Roadmap {
 
     @Column(nullable = false, unique = true)
     private String slug;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "exam_id")
-    private Exam exam;
 
     private Integer durationWeeks;
 

@@ -1,0 +1,22 @@
+﻿# Backend
+careersetu-backend/target/
+careersetu-backend/.mvn/
+*.class
+
+# Frontend
+careersetu-frontend/node_modules/
+careersetu-frontend/dist/
+careersetu-frontend/.env
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env files
+.env
+.env.local

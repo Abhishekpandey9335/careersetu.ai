@@ -1,4 +1,4 @@
-package com.careersetu.controller;
+﻿package com.careersetu.controller;
 
 import com.careersetu.entity.UserApplication;
 import com.careersetu.exception.ApiResponse;
@@ -17,7 +17,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/applications")
 @RequiredArgsConstructor
-@Tag(name = "Application Tracker", description = "Track submitted job and exam applications")
+@Tag(name = "Application Tracker", description = "Track submitted job applications")
 @SecurityRequirement(name = "bearerAuth")
 public class ApplicationTrackerController {
 
@@ -42,15 +42,6 @@ public class ApplicationTrackerController {
             @RequestParam(required = false) String notes) {
         return ResponseEntity.status(201).body(ApiResponse.success("Tracked",
                 trackerService.trackJobApplication(currentUserId(), jobId, notes)));
-    }
-
-    @PostMapping("/exams/{examId}")
-    @Operation(summary = "Track a new exam application")
-    public ResponseEntity<ApiResponse<UserApplication>> trackExam(
-            @PathVariable Long examId,
-            @RequestParam(required = false) String notes) {
-        return ResponseEntity.status(201).body(ApiResponse.success("Tracked",
-                trackerService.trackExamApplication(currentUserId(), examId, notes)));
     }
 
     @PatchMapping("/{id}/status")

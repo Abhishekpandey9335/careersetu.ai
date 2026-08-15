@@ -1,4 +1,4 @@
-package com.careersetu.dto.studymaterial;
+﻿package com.careersetu.dto.studymaterial;
 
 import com.careersetu.entity.StudyMaterial;
 import lombok.Data;
@@ -8,8 +8,6 @@ import java.time.LocalDateTime;
 public class StudyMaterialDto {
     private Long id;
     private String title;
-    private Long examId;
-    private String examName;
     private String subject;
     private StudyMaterial.MaterialType type;
     private String fileUrl;

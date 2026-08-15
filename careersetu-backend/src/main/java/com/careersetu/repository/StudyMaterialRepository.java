@@ -1,4 +1,4 @@
-package com.careersetu.repository;
+﻿package com.careersetu.repository;
 
 import com.careersetu.entity.StudyMaterial;
 import org.springframework.data.domain.Page;
@@ -13,13 +13,11 @@ public interface StudyMaterialRepository extends JpaRepository<StudyMaterial, Lo
 
     @Query("""
         SELECT s FROM StudyMaterial s
-        WHERE (:examId IS NULL OR s.exam.id = :examId)
-          AND (:type IS NULL OR s.type = :type)
+        WHERE (:type IS NULL OR s.type = :type)
           AND (:premium IS NULL OR s.isPremium = :premium)
         ORDER BY s.downloadsCount DESC
         """)
     Page<StudyMaterial> filterMaterials(
-            @Param("examId") Long examId,
             @Param("type") StudyMaterial.MaterialType type,
             @Param("premium") Boolean premium,
             Pageable pageable

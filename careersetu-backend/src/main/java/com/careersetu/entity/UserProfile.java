@@ -48,6 +48,6 @@ public class UserProfile {
     }
 
     public enum PreferredMode {
-        GOVT_JOB, PRIVATE_JOB, BOTH, ENTREPRENEURSHIP
+        PRIVATE_JOB, ENTREPRENEURSHIP
     }
 }

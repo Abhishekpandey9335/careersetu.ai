@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+﻿import { Link } from 'react-router-dom';
 import { Home, Search, ArrowLeft } from 'lucide-react';
 
 export default function NotFound() {
@@ -14,16 +14,16 @@ export default function NotFound() {
           <Link to="/" className="btn btn-primary btn-lg">
             <Home size={16} /> Go to Home
           </Link>
-          <Link to="/govt-exams" className="btn btn-outline btn-lg">
-            <Search size={16} /> Browse Exams
+          <Link to="/private-jobs" className="btn btn-outline btn-lg">
+            <Search size={16} /> Browse Jobs
           </Link>
         </div>
         <div style={{ marginTop: 40, padding: 20, background: 'var(--bg-gray)', borderRadius: 'var(--radius-xl)' }}>
           <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 12 }}>Quick Links</p>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
             {[
-              { label: 'Govt Exams', path: '/govt-exams' },
               { label: 'Private Jobs', path: '/private-jobs' },
+              { label: 'Internships', path: '/internships' },
               { label: 'AI Advisor', path: '/ai-advisor' },
               { label: 'Study Material', path: '/study-material' },
               { label: 'Roadmaps', path: '/roadmaps' },

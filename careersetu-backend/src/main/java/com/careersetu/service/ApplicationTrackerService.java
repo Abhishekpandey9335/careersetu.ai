@@ -1,4 +1,4 @@
-package com.careersetu.service;
+﻿package com.careersetu.service;
 
 import com.careersetu.entity.*;
 import com.careersetu.exception.BadRequestException;
@@ -18,7 +18,6 @@ public class ApplicationTrackerService {
     private final UserApplicationRepository applicationRepository;
     private final UserRepository userRepository;
     private final JobRepository jobRepository;
-    private final ExamRepository examRepository;
 
     public List<UserApplication> getUserApplications(Long userId) {
         return applicationRepository.findByUserIdOrderByAppliedAtDesc(userId);
@@ -37,22 +36,6 @@ public class ApplicationTrackerService {
         return applicationRepository.save(UserApplication.builder()
                 .user(user).jobId(jobId)
                 .entityType(UserApplication.ApplicationEntityType.JOB)
-                .notes(notes).build());
-    }
-
-    @Transactional
-    public UserApplication trackExamApplication(Long userId, Long examId, String notes) {
-        if (applicationRepository.existsByUserIdAndExamId(userId, examId))
-            throw new BadRequestException("Already tracking this exam application");
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
-        examRepository.findById(examId)
-                .orElseThrow(() -> new ResourceNotFoundException("Exam", examId));
-
-        return applicationRepository.save(UserApplication.builder()
-                .user(user).examId(examId)
-                .entityType(UserApplication.ApplicationEntityType.EXAM)
                 .notes(notes).build());
     }
 

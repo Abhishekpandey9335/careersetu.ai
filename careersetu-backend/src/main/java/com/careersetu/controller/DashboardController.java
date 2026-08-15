@@ -1,4 +1,4 @@
-package com.careersetu.controller;
+﻿package com.careersetu.controller;
 
 import com.careersetu.entity.Notification;
 import com.careersetu.entity.UserApplication;
@@ -28,7 +28,6 @@ public class DashboardController {
     private final ApplicationTrackerService applicationTrackerService;
     private final NotificationService  notificationService;
     private final BookmarkService      bookmarkService;
-    private final ExamService          examService;
     private final JobService           jobService;
 
     private Long currentUserId() {
@@ -40,7 +39,7 @@ public class DashboardController {
      * GET /api/dashboard
      */
     @GetMapping
-    @Operation(summary = "Full dashboard: profile + applications + notifications + bookmarks + upcoming exams")
+    @Operation(summary = "Full dashboard: profile + applications + notifications + bookmarks")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getDashboard() {
         Long userId = currentUserId();
         Map<String, Object> dashboard = new LinkedHashMap<>();
@@ -66,12 +65,8 @@ public class DashboardController {
 
         // Bookmarks
         dashboard.put("bookmarks", Map.of(
-                "exams", bookmarkService.getUserBookmarks(userId, "EXAM"),
                 "jobs",  bookmarkService.getUserBookmarks(userId, "JOB")
         ));
-
-        // Upcoming exam deadlines (next 7 days)
-        dashboard.put("upcomingDeadlines", examService.getUpcoming(7));
 
         return ResponseEntity.ok(ApiResponse.success(dashboard));
     }
@@ -89,7 +84,6 @@ public class DashboardController {
         stats.put("totalApplications",    apps.size());
         stats.put("selectedApplications", apps.stream().filter(a -> a.getStatus() == UserApplication.ApplicationStatus.SELECTED).count());
         stats.put("unreadNotifications",  notificationService.getUnreadCount(userId));
-        stats.put("savedExams",  bookmarkService.getUserBookmarks(userId, "EXAM").size());
         stats.put("savedJobs",   bookmarkService.getUserBookmarks(userId, "JOB").size());
         return ResponseEntity.ok(ApiResponse.success(stats));
     }

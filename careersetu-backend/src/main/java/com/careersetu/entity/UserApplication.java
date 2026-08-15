@@ -1,4 +1,4 @@
-package com.careersetu.entity;
+﻿package com.careersetu.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -19,9 +19,7 @@ public class UserApplication {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    // Either jobId or examId will be set
     private Long jobId;
-    private Long examId;
 
     @Enumerated(EnumType.STRING)
     private ApplicationEntityType entityType;
@@ -39,7 +37,7 @@ public class UserApplication {
     private LocalDateTime updatedAt;
 
     public enum ApplicationEntityType {
-        JOB, EXAM
+        JOB
     }
 
     public enum ApplicationStatus {

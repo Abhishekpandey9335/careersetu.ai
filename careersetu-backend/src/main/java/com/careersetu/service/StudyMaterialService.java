@@ -1,4 +1,4 @@
-package com.careersetu.service;
+﻿package com.careersetu.service;
 
 import com.careersetu.dto.studymaterial.StudyMaterialDto;
 import com.careersetu.entity.*;
@@ -15,13 +15,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class StudyMaterialService {
 
     private final StudyMaterialRepository studyMaterialRepository;
-    private final ExamRepository examRepository;
     private final UserRepository userRepository;
 
-    public Page<StudyMaterialDto> filter(Long examId, StudyMaterial.MaterialType type,
+    public Page<StudyMaterialDto> filter(StudyMaterial.MaterialType type,
                                           Boolean premium, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "downloadsCount"));
-        return studyMaterialRepository.filterMaterials(examId, type, premium, pageable)
+        return studyMaterialRepository.filterMaterials(type, premium, pageable)
                 .map(this::toDto);
     }
 
@@ -43,17 +42,14 @@ public class StudyMaterialService {
     }
 
     @Transactional
-    public StudyMaterialDto create(String title, Long examId, String subject,
+    public StudyMaterialDto create(String title, String subject,
                                     StudyMaterial.MaterialType type, String fileUrl,
                                     boolean isPremium, Long uploadedById) {
-        Exam exam = examId != null
-                ? examRepository.findById(examId).orElseThrow(() -> new ResourceNotFoundException("Exam", examId))
-                : null;
         User uploader = userRepository.findById(uploadedById)
                 .orElseThrow(() -> new ResourceNotFoundException("User", uploadedById));
 
         StudyMaterial m = StudyMaterial.builder()
-                .title(title).exam(exam).subject(subject).type(type)
+                .title(title).subject(subject).type(type)
                 .fileUrl(fileUrl).isPremium(isPremium).uploadedBy(uploader).build();
         return toDto(studyMaterialRepository.save(m));
     }
@@ -71,10 +67,6 @@ public class StudyMaterialService {
         dto.setSubject(m.getSubject()); dto.setType(m.getType());
         dto.setFileUrl(m.getFileUrl()); dto.setPremium(m.isPremium());
         dto.setDownloadsCount(m.getDownloadsCount()); dto.setCreatedAt(m.getCreatedAt());
-        if (m.getExam() != null) {
-            dto.setExamId(m.getExam().getId());
-            dto.setExamName(m.getExam().getName());
-        }
         return dto;
     }
 }

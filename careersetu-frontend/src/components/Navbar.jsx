@@ -6,7 +6,6 @@ import './Navbar.css';
 
 const navLinks = [
   { label: 'Home', path: '/' },
-  { label: 'Govt Exams', path: '/govt-exams' },
   { label: 'Private Jobs', path: '/private-jobs' },
   { label: 'Internships', path: '/internships' },
   { label: 'Companies', path: '/companies' },

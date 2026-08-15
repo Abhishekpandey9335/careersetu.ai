@@ -1,4 +1,4 @@
-package com.careersetu.service;
+﻿package com.careersetu.service;
 
 import com.careersetu.dto.roadmap.RoadmapDto;
 import com.careersetu.entity.*;
@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 public class RoadmapService {
 
     private final RoadmapRepository roadmapRepository;
-    private final ExamRepository examRepository;
 
     public RoadmapDto getBySlug(String slug) {
         return toDto(roadmapRepository.findBySlug(slug)
@@ -27,18 +26,11 @@ public class RoadmapService {
                 .stream().map(this::toDto).collect(Collectors.toList());
     }
 
-    public List<RoadmapDto> getByExam(Long examId) {
-        return roadmapRepository.findByExamId(examId)
-                .stream().map(this::toDto).collect(Collectors.toList());
-    }
-
-    public RoadmapDto save(String title, String slug, Long examId,
+    public RoadmapDto save(String title, String slug,
                             Integer durationWeeks, Roadmap.Difficulty difficulty,
                             Double successRate, Object planJson, User createdBy) {
-        Exam exam = examId != null ? examRepository.findById(examId)
-                .orElseThrow(() -> new ResourceNotFoundException("Exam", examId)) : null;
         Roadmap roadmap = Roadmap.builder()
-                .title(title).slug(slug).exam(exam)
+                .title(title).slug(slug)
                 .durationWeeks(durationWeeks).difficulty(difficulty)
                 .successRate(successRate).planJson(planJson).createdBy(createdBy)
                 .build();
@@ -50,10 +42,6 @@ public class RoadmapService {
         dto.setId(r.getId()); dto.setTitle(r.getTitle()); dto.setSlug(r.getSlug());
         dto.setDurationWeeks(r.getDurationWeeks()); dto.setDifficulty(r.getDifficulty());
         dto.setSuccessRate(r.getSuccessRate()); dto.setPlanJson(r.getPlanJson());
-        if (r.getExam() != null) {
-            dto.setExamId(r.getExam().getId());
-            dto.setExamName(r.getExam().getName());
-        }
         return dto;
     }
 }
