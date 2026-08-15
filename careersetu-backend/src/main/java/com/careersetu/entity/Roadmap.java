@@ -1,4 +1,4 @@
-﻿package com.careersetu.entity;
+package com.careersetu.entity;
 
 import jakarta.persistence.*;
 import lombok.*;

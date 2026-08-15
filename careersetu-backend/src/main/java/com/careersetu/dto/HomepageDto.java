@@ -1,4 +1,4 @@
-﻿package com.careersetu.dto;
+package com.careersetu.dto;
 
 import com.careersetu.dto.job.JobDto;
 import com.careersetu.dto.roadmap.RoadmapDto;

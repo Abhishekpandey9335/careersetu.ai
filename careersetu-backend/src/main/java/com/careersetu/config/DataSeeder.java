@@ -1,4 +1,4 @@
-﻿package com.careersetu.config;
+package com.careersetu.config;
 
 import com.careersetu.entity.*;
 import com.careersetu.repository.*;

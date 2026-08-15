@@ -1,4 +1,4 @@
-﻿package com.careersetu.scheduler;
+package com.careersetu.scheduler;
 
 import com.careersetu.entity.User;
 import com.careersetu.repository.UserRepository;

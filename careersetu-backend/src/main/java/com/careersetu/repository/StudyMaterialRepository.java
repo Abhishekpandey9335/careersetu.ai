@@ -1,4 +1,4 @@
-﻿package com.careersetu.repository;
+package com.careersetu.repository;
 
 import com.careersetu.entity.StudyMaterial;
 import org.springframework.data.domain.Page;

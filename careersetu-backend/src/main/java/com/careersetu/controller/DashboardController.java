@@ -1,4 +1,4 @@
-﻿package com.careersetu.controller;
+package com.careersetu.controller;
 
 import com.careersetu.entity.Notification;
 import com.careersetu.entity.UserApplication;

@@ -1,4 +1,4 @@
-﻿package com.careersetu.dto.studymaterial;
+package com.careersetu.dto.studymaterial;
 
 import com.careersetu.entity.StudyMaterial;
 import lombok.Data;

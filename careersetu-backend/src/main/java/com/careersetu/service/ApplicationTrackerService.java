@@ -1,4 +1,4 @@
-﻿package com.careersetu.service;
+package com.careersetu.service;
 
 import com.careersetu.entity.*;
 import com.careersetu.exception.BadRequestException;

@@ -1,4 +1,4 @@
-﻿package com.careersetu.service;
+package com.careersetu.service;
 
 import com.careersetu.dto.HomepageDto;
 import com.careersetu.entity.Job;
