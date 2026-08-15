@@ -13,8 +13,10 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -85,14 +87,21 @@ public class AiController {
     }
 
     @PostMapping("/interview-coach")
-    @Operation(summary = "AI Mock Interview — ask questions, evaluate answers, give feedback")
+    @Operation(summary = "AI Mock Interview â€” ask questions, evaluate answers, give feedback")
     public ResponseEntity<ApiResponse<AiChatResponse>> interviewCoach(
             @Valid @RequestBody com.careersetu.dto.ai.InterviewCoachRequest request) {
         return ResponseEntity.ok(ApiResponse.success(aiService.conductMockInterview(currentUserId(), request)));
     }
 
+    @PostMapping(value = "/resume/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Upload a resume (PDF/DOCX). AI analyses it and all future AI Advisor answers use it as context.")
+    public ResponseEntity<ApiResponse<com.careersetu.dto.ai.ResumeAnalysisResponse>> uploadResume(
+            @RequestParam("file") MultipartFile file) {
+        return ResponseEntity.ok(ApiResponse.success(aiService.uploadAndAnalyzeResume(currentUserId(), file)));
+    }
+
     @GetMapping("/career-gps")
-    @Operation(summary = "Career GPS — step-by-step path to reach target salary in N years")
+    @Operation(summary = "Career GPS â€” step-by-step path to reach target salary in N years")
     public ResponseEntity<ApiResponse<AiChatResponse>> careerGps(
             @RequestParam String targetSalary,
             @RequestParam(defaultValue = "2") int targetYears) {

@@ -15,6 +15,7 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
 
@@ -26,6 +27,8 @@ public class AiService {
     private final AiConversationRepository conversationRepository;
     private final UserRepository userRepository;
     private final UserProfileRepository userProfileRepository;
+    private final ResumeUploadRepository resumeUploadRepository;
+    private final ResumeTextExtractor resumeTextExtractor;
 
     @Value("${ai.provider}")
     private String aiProvider;
@@ -44,7 +47,7 @@ public class AiService {
 
     private final RestTemplate restTemplate;
 
-    // ─── Public API ────────────────────────────────────────────────────────────
+    // ---- Public API ----
 
     @Transactional
     public AiChatResponse chat(Long userId, AiChatRequest request) {
@@ -143,22 +146,28 @@ public class AiService {
         conversationRepository.delete(conv);
     }
 
-    // ─── Helpers ───────────────────────────────────────────────────────────────
+    // ---- Helpers ----
 
     private String buildProfileContext(Long userId) {
-        return userProfileRepository.findByUserId(userId).map(p ->
+        String base = userProfileRepository.findByUserId(userId).map(p ->
                 String.format("Age: %s | Qualification: %s | Stream: %s | State: %s | " +
                               "Category: %s | Skills: %s | Goal: %s | Expected Salary: ₹%sk/month",
                         p.getAge(), p.getQualification(), p.getStream(), p.getState(),
                         p.getCategory(),
                         p.getSkills() != null ? String.join(", ", p.getSkills()) : "Not specified",
                         p.getGoal(), p.getExpectedSalary())
-        ).orElse("Profile not yet completed — giving general guidance");
+        ).orElse("Profile not yet completed - giving general guidance");
+
+        String resumeCtx = resumeUploadRepository.findTopByUserIdOrderByUploadedAtDesc(userId)
+                .map(r -> "\n\nResume on file (\"" + r.getFileName() + "\"), extracted text:\n" + r.getExtractedText())
+                .orElse("");
+
+        return base + resumeCtx;
     }
 
     private String buildSystemPrompt(String name, String profileContext) {
         return String.format("""
-                You are CareerSetu's AI Career Advisor — India's most helpful career guidance assistant.
+                You are CareerSetu's AI Career Advisor - India's most helpful career guidance assistant.
                 Help Indian students from Class 10 to Postgraduate find the best career path.
 
                 Student Name: %s
@@ -305,7 +314,7 @@ public class AiService {
                 "Step-by-step GPS route: 1) Current position assessment  2) Year-by-year milestones  " +
                 "3) Skills to acquire (priority order)  4) Exams/certifications  5) Job switch strategy  " +
                 "6) Salary checkpoints  7) Risks & mitigation  8) Fastest vs safe route.\n" +
-                "Be very specific — exam names, company names, exact skills.",
+                "Be very specific - exam names, company names, exact skills.",
                 profile, targetSalary, targetYears);
         String reply = callAiApi(singleTurn(
                 "You are CareerSetu AI Career GPS. Create precise roadmaps for Indian students.", prompt));
@@ -318,6 +327,57 @@ public class AiService {
         String reply = callAiApi(singleTurn(
                 "You are an expert ATS resume reviewer for the Indian job market.", prompt));
         return com.careersetu.dto.ai.AiChatResponse.builder().reply(reply).build();
+    }
+    @Transactional
+    public com.careersetu.dto.ai.ResumeAnalysisResponse uploadAndAnalyzeResume(Long userId, MultipartFile file) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
+
+        if (file == null || file.isEmpty())
+            throw new BadRequestException("Please attach a resume file.");
+        if (file.getSize() > 5 * 1024 * 1024)
+            throw new BadRequestException("File too large. Max size is 5MB.");
+
+        String text;
+        try {
+            text = resumeTextExtractor.extract(file);
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException(e.getMessage());
+        } catch (Exception e) {
+            log.error("Resume extraction failed: {}", e.getMessage());
+            throw new BadRequestException("Could not read this file. Please upload a valid PDF or DOCX.");
+        }
+
+        if (text == null || text.isBlank())
+            throw new BadRequestException("No readable text found in this file.");
+
+        String trimmed = text.length() > 6000 ? text.substring(0, 6000) : text;
+
+        ResumeUpload resume = ResumeUpload.builder()
+                .user(user).fileName(file.getOriginalFilename()).extractedText(trimmed)
+                .build();
+        resume = resumeUploadRepository.save(resume);
+
+        String profile = buildProfileContext(userId);
+        String prompt = String.format("""
+                Analyse this student's resume and profile in detail.
+                Student profile (includes resume text): %s
+
+                Provide:
+                1. Overall impression (strengths & weaknesses)
+                2. Key skills detected in the resume
+                3. Best-fit career paths based on this resume (top 3, ranked)
+                4. A personalised step-by-step career roadmap for the top recommendation
+                5. What to add or improve in the resume itself
+                Be specific to the Indian job market.
+                """, profile);
+
+        String reply = callAiApi(singleTurn(
+                "You are CareerSetu's AI Career Advisor. You read resumes carefully and give precise, actionable career guidance.",
+                prompt));
+
+        return com.careersetu.dto.ai.ResumeAnalysisResponse.builder()
+                .resumeId(resume.getId()).fileName(resume.getFileName()).reply(reply).build();
     }
 
 }
