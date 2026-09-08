@@ -194,7 +194,7 @@ public class AiService {
         try {
             String apiUrl = aiProvider.equals("openai") ? openaiApiUrl : grokApiUrl;
             String apiKey = aiProvider.equals("openai") ? openaiApiKey : grokApiKey;
-            String model  = aiProvider.equals("openai") ? "gpt-4o" : "llama-3.3-70b-versatile";
+            String model  = aiProvider.equals("openai") ? "gpt-4o" : "openai/gpt-oss-120b";
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);

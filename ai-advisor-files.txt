@@ -1,0 +1,873 @@
+
+==== FILE: careersetu-backend\src\main\java\com\careersetu\controller\AiController.java ====
+1	package com.careersetu.controller;
+2	
+3	import com.careersetu.dto.ai.AiChatRequest;
+4	import com.careersetu.dto.ai.AiChatResponse;
+5	import com.careersetu.dto.ai.RoadmapGenerateRequest;
+6	import com.careersetu.entity.AiConversation;
+7	import com.careersetu.exception.ApiResponse;
+8	import com.careersetu.repository.UserRepository;
+9	import com.careersetu.service.AiService;
+10	import com.careersetu.util.SecurityUtil;
+11	import io.swagger.v3.oas.annotations.Operation;
+12	import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+13	import io.swagger.v3.oas.annotations.tags.Tag;
+14	import jakarta.validation.Valid;
+15	import lombok.RequiredArgsConstructor;
+16	import org.springframework.http.ResponseEntity;
+17	import org.springframework.web.bind.annotation.*;
+18	
+19	import java.util.List;
+20	
+21	@RestController
+22	@RequestMapping("/ai")
+23	@RequiredArgsConstructor
+24	@Tag(name = "AI Career Advisor", description = "Chat, roadmap generation, skill gap analysis")
+25	@SecurityRequirement(name = "bearerAuth")
+26	public class AiController {
+27	
+28	    private final AiService aiService;
+29	    private final UserRepository userRepository;
+30	
+31	    private Long currentUserId() {
+32	        return userRepository.findByEmail(SecurityUtil.getCurrentEmail()).orElseThrow().getId();
+33	    }
+34	
+35	    @PostMapping("/chat")
+36	    @Operation(summary = "Chat with AI Career Advisor. Pass conversationId to continue a thread.")
+37	    public ResponseEntity<ApiResponse<AiChatResponse>> chat(@Valid @RequestBody AiChatRequest request) {
+38	        return ResponseEntity.ok(ApiResponse.success(aiService.chat(currentUserId(), request)));
+39	    }
+40	
+41	    @PostMapping("/roadmap")
+42	    @Operation(summary = "Generate a personalised study roadmap for an exam or career goal")
+43	    public ResponseEntity<ApiResponse<AiChatResponse>> generateRoadmap(
+44	            @Valid @RequestBody RoadmapGenerateRequest request) {
+45	        return ResponseEntity.ok(ApiResponse.success(aiService.generateRoadmap(currentUserId(), request)));
+46	    }
+47	
+48	    @GetMapping("/skill-gap")
+49	    @Operation(summary = "Analyse skill gap against a target role (e.g. 'Data Analyst at TCS')")
+50	    public ResponseEntity<ApiResponse<AiChatResponse>> skillGap(@RequestParam String targetRole) {
+51	        return ResponseEntity.ok(ApiResponse.success(aiService.analyzeSkillGap(currentUserId(), targetRole)));
+52	    }
+53	
+54	    @GetMapping("/conversations")
+55	    @Operation(summary = "Fetch saved conversation history (last 20)")
+56	    public ResponseEntity<ApiResponse<List<AiConversation>>> getConversations() {
+57	        return ResponseEntity.ok(ApiResponse.success(aiService.getUserConversations(currentUserId())));
+58	    }
+59	
+60	    @DeleteMapping("/conversations/{id}")
+61	    @Operation(summary = "Delete a saved conversation")
+62	    public ResponseEntity<ApiResponse<Void>> deleteConversation(@PathVariable Long id) {
+63	        aiService.deleteConversation(id, currentUserId());
+64	        return ResponseEntity.ok(ApiResponse.success("Conversation deleted", null));
+65	    }
+66	
+67	    @PostMapping("/salary-predictor")
+68	    @Operation(summary = "Predict salary at 1yr, 3yr, 5yr for a career path")
+69	    public ResponseEntity<ApiResponse<AiChatResponse>> predictSalary(
+70	            @Valid @RequestBody com.careersetu.dto.ai.SalaryPredictorRequest request) {
+71	        return ResponseEntity.ok(ApiResponse.success(aiService.predictSalary(currentUserId(), request)));
+72	    }
+73	
+74	    @GetMapping("/career-guidance")
+75	    @Operation(summary = "Get top 5 personalised career path recommendations")
+76	    public ResponseEntity<ApiResponse<AiChatResponse>> careerGuidance() {
+77	        return ResponseEntity.ok(ApiResponse.success(aiService.getCareerGuidance(currentUserId())));
+78	    }
+79	
+80	    @PostMapping("/college-predictor")
+81	    @Operation(summary = "Predict best stream/college for Class 10 or 12 students")
+82	    public ResponseEntity<ApiResponse<AiChatResponse>> collegePredictor(
+83	            @Valid @RequestBody com.careersetu.dto.ai.CollegePredictorRequest request) {
+84	        return ResponseEntity.ok(ApiResponse.success(aiService.predictCollegeOrStream(currentUserId(), request)));
+85	    }
+86	
+87	    @PostMapping("/interview-coach")
+88	    @Operation(summary = "AI Mock Interview — ask questions, evaluate answers, give feedback")
+89	    public ResponseEntity<ApiResponse<AiChatResponse>> interviewCoach(
+90	            @Valid @RequestBody com.careersetu.dto.ai.InterviewCoachRequest request) {
+91	        return ResponseEntity.ok(ApiResponse.success(aiService.conductMockInterview(currentUserId(), request)));
+92	    }
+93	
+94	    @GetMapping("/career-gps")
+95	    @Operation(summary = "Career GPS — step-by-step path to reach target salary in N years")
+96	    public ResponseEntity<ApiResponse<AiChatResponse>> careerGps(
+97	            @RequestParam String targetSalary,
+98	            @RequestParam(defaultValue = "2") int targetYears) {
+99	        return ResponseEntity.ok(ApiResponse.success(aiService.getCareerGps(currentUserId(), targetSalary, targetYears)));
+100	    }
+101	
+102	}
+
+==== FILE: careersetu-backend\src\main\java\com\careersetu\service\AiService.java ====
+1	package com.careersetu.service;
+2	
+3	import com.careersetu.dto.ai.AiChatRequest;
+4	import com.careersetu.dto.ai.AiChatResponse;
+5	import com.careersetu.dto.ai.RoadmapGenerateRequest;
+6	import com.careersetu.entity.*;
+7	import com.careersetu.exception.BadRequestException;
+8	import com.careersetu.exception.ResourceNotFoundException;
+9	import com.careersetu.repository.*;
+10	import lombok.RequiredArgsConstructor;
+11	import lombok.extern.slf4j.Slf4j;
+12	import org.springframework.beans.factory.annotation.Value;
+13	import org.springframework.data.domain.PageRequest;
+14	import org.springframework.http.*;
+15	import org.springframework.stereotype.Service;
+16	import org.springframework.transaction.annotation.Transactional;
+17	import org.springframework.web.client.RestTemplate;
+18	
+19	import java.util.*;
+20	
+21	@Service
+22	@RequiredArgsConstructor
+23	@Slf4j
+24	public class AiService {
+25	
+26	    private final AiConversationRepository conversationRepository;
+27	    private final UserRepository userRepository;
+28	    private final UserProfileRepository userProfileRepository;
+29	
+30	    @Value("${ai.provider}")
+31	    private String aiProvider;
+32	
+33	    @Value("${ai.grok-api-url}")
+34	    private String grokApiUrl;
+35	
+36	    @Value("${ai.grok-api-key}")
+37	    private String grokApiKey;
+38	
+39	    @Value("${ai.openai-api-url}")
+40	    private String openaiApiUrl;
+41	
+42	    @Value("${ai.openai-api-key}")
+43	    private String openaiApiKey;
+44	
+45	    private final RestTemplate restTemplate;
+46	
+47	    // ─── Public API ────────────────────────────────────────────────────────────
+48	
+49	    @Transactional
+50	    public AiChatResponse chat(Long userId, AiChatRequest request) {
+51	        User user = userRepository.findById(userId)
+52	                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
+53	
+54	        AiConversation conversation;
+55	        List<Object> messages;
+56	
+57	        if (request.getConversationId() != null) {
+58	            conversation = conversationRepository.findById(request.getConversationId())
+59	                    .orElseThrow(() -> new ResourceNotFoundException("Conversation", request.getConversationId()));
+60	            if (!conversation.getUser().getId().equals(userId))
+61	                throw new ResourceNotFoundException("Conversation", request.getConversationId());
+62	            messages = new ArrayList<>(conversation.getMessagesJson());
+63	        } else {
+64	            conversation = AiConversation.builder()
+65	                    .user(user).messagesJson(new ArrayList<>()).build();
+66	            messages = new ArrayList<>();
+67	            messages.add(Map.of("role", "system",
+68	                    "content", buildSystemPrompt(user.getName(), buildProfileContext(userId))));
+69	        }
+70	
+71	        messages.add(Map.of("role", "user", "content", request.getMessage()));
+72	        String reply = callAiApi(messages);
+73	        messages.add(Map.of("role", "assistant", "content", reply));
+74	
+75	        if (conversation.getTitle() == null) {
+76	            String title = request.getMessage();
+77	            conversation.setTitle(title.length() > 60 ? title.substring(0, 57) + "..." : title);
+78	        }
+79	        conversation.setMessagesJson(messages);
+80	        conversation = conversationRepository.save(conversation);
+81	
+82	        return AiChatResponse.builder()
+83	                .conversationId(conversation.getId())
+84	                .reply(reply)
+85	                .conversationTitle(conversation.getTitle())
+86	                .build();
+87	    }
+88	
+89	    @Transactional
+90	    public AiChatResponse generateRoadmap(Long userId, RoadmapGenerateRequest request) {
+91	        String profile = buildProfileContext(userId);
+92	        String prompt = String.format("""
+93	                Generate a detailed %d-week study roadmap for: %s
+94	                Student profile: %s
+95	                Daily study hours available: %d
+96	
+97	                Structure the response as:
+98	                1. Overview and strategy
+99	                2. Week-by-week plan (topics, daily tasks, resources)
+100	                3. Milestone checkpoints
+101	                4. Recommended books and YouTube channels
+102	                5. Mock test schedule
+103	                """, request.getDurationWeeks(), request.getExamOrGoal(), profile, request.getHoursPerDay());
+104	
+105	        String reply = callAiApi(singleTurn(
+106	                "You are CareerSetu's AI Career Advisor. Generate detailed, actionable roadmaps for Indian students.",
+107	                prompt));
+108	        return AiChatResponse.builder().reply(reply).build();
+109	    }
+110	
+111	    public AiChatResponse analyzeSkillGap(Long userId, String targetRole) {
+112	        String profile = buildProfileContext(userId);
+113	        String prompt = String.format("""
+114	                Analyse the skill gap for this student targeting: %s
+115	                Student profile: %s
+116	
+117	                Provide:
+118	                1. All skills required for the target role
+119	                2. Skills already present (from profile)
+120	                3. Missing skills ranked by priority
+121	                4. Best free + paid resources per missing skill
+122	                5. Realistic timeline to be job-ready
+123	                """, targetRole, profile);
+124	
+125	        String reply = callAiApi(singleTurn(
+126	                "You are CareerSetu's AI Career Advisor specialising in skill gap analysis for Indian students.",
+127	                prompt));
+128	        return AiChatResponse.builder().reply(reply).build();
+129	    }
+130	
+131	    public List<AiConversation> getUserConversations(Long userId) {
+132	        return conversationRepository
+133	                .findByUserIdOrderByUpdatedAtDesc(userId, PageRequest.of(0, 20))
+134	                .getContent();
+135	    }
+136	
+137	    @Transactional
+138	    public void deleteConversation(Long conversationId, Long userId) {
+139	        AiConversation conv = conversationRepository.findById(conversationId)
+140	                .orElseThrow(() -> new ResourceNotFoundException("Conversation", conversationId));
+141	        if (!conv.getUser().getId().equals(userId))
+142	            throw new ResourceNotFoundException("Conversation", conversationId);
+143	        conversationRepository.delete(conv);
+144	    }
+145	
+146	    // ─── Helpers ───────────────────────────────────────────────────────────────
+147	
+148	    private String buildProfileContext(Long userId) {
+149	        return userProfileRepository.findByUserId(userId).map(p ->
+150	                String.format("Age: %s | Qualification: %s | Stream: %s | State: %s | " +
+151	                              "Category: %s | Skills: %s | Goal: %s | Expected Salary: ₹%sk/month",
+152	                        p.getAge(), p.getQualification(), p.getStream(), p.getState(),
+153	                        p.getCategory(),
+154	                        p.getSkills() != null ? String.join(", ", p.getSkills()) : "Not specified",
+155	                        p.getGoal(), p.getExpectedSalary())
+156	        ).orElse("Profile not yet completed — giving general guidance");
+157	    }
+158	
+159	    private String buildSystemPrompt(String name, String profileContext) {
+160	        return String.format("""
+161	                You are CareerSetu's AI Career Advisor — India's most helpful career guidance assistant.
+162	                Help Indian students from Class 10 to Postgraduate find the best career path.
+163	
+164	                Student Name: %s
+165	                Student Profile: %s
+166	
+167	                Guidelines:
+168	                - Give personalised advice based on the student profile above
+169	                - Be specific: exam names, cutoffs, salary ranges, timelines
+170	                - Use simple, clear language (many users are from Tier 2/3 cities)
+171	                - Always confirm eligibility before recommending exams
+172	                - Format roadmaps and lists cleanly with sections
+173	                """, name, profileContext);
+174	    }
+175	
+176	    private List<Object> singleTurn(String systemPrompt, String userMessage) {
+177	        return List.of(
+178	                Map.of("role", "system",  "content", systemPrompt),
+179	                Map.of("role", "user",    "content", userMessage)
+180	        );
+181	    }
+182	
+183	    @SuppressWarnings("unchecked")
+184	    private String callAiApi(List<Object> messages) {
+185	        try {
+186	            String apiUrl = aiProvider.equals("openai") ? openaiApiUrl : grokApiUrl;
+187	            String apiKey = aiProvider.equals("openai") ? openaiApiKey : grokApiKey;
+188	            String model  = aiProvider.equals("openai") ? "gpt-4o" : "llama-3.3-70b-versatile";
+189	
+190	            HttpHeaders headers = new HttpHeaders();
+191	            headers.setContentType(MediaType.APPLICATION_JSON);
+192	            headers.setBearerAuth(apiKey);
+193	
+194	            Map<String, Object> body = new HashMap<>();
+195	            body.put("model", model);
+196	            body.put("messages", messages);
+197	            body.put("max_tokens", 2048);
+198	            body.put("temperature", 0.7);
+199	
+200	            ResponseEntity<Map> response = restTemplate.postForEntity(
+201	                    apiUrl, new HttpEntity<>(body, headers), Map.class);
+202	
+203	            if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+204	                List<Map<String, Object>> choices =
+205	                        (List<Map<String, Object>>) response.getBody().get("choices");
+206	                if (choices != null && !choices.isEmpty()) {
+207	                    Map<String, Object> msg = (Map<String, Object>) choices.get(0).get("message");
+208	                    return (String) msg.get("content");
+209	                }
+210	            }
+211	            throw new BadRequestException("AI service returned empty response");
+212	        } catch (BadRequestException e) {
+213	            throw e;
+214	        } catch (Exception e) {
+215	            log.error("AI API call failed: {}", e.getMessage());
+216	            throw new BadRequestException("AI service unavailable. Please try again shortly.");
+217	        }
+218	    }
+219	
+220	    public com.careersetu.dto.ai.AiChatResponse predictSalary(Long userId, com.careersetu.dto.ai.SalaryPredictorRequest req) {
+221	        String profile = buildProfileContext(userId);
+222	        String prompt = String.format(
+223	                "Predict the salary trajectory for an Indian student pursuing: %s\n" +
+224	                "Location preference: %s\n" +
+225	                "Current experience: %d years\n" +
+226	                "Student profile: %s\n\n" +
+227	                "Provide a structured salary prediction:\n" +
+228	                "1. Entry-level (0-1 year): expected CTC range\n" +
+229	                "2. Mid-level (3 years): expected CTC range\n" +
+230	                "3. Senior (5 years): expected CTC range\n" +
+231	                "4. Factors that will increase salary faster\n" +
+232	                "5. Top 3 companies to target for best packages\n" +
+233	                "6. Skills that give maximum salary boost\n" +
+234	                "Include realistic in-hand salary vs CTC breakdown.",
+235	                req.getCareerPath(),
+236	                req.getLocation() != null ? req.getLocation() : "Metro cities",
+237	                req.getCurrentExperience(), profile);
+238	
+239	        String reply = callAiApi(singleTurn(
+240	                "You are CareerSetu AI. Provide accurate salary predictions for India.",
+241	                prompt));
+242	        return com.careersetu.dto.ai.AiChatResponse.builder().reply(reply).build();
+243	    }
+244	
+245	    public com.careersetu.dto.ai.AiChatResponse getCareerGuidance(Long userId) {
+246	        String profile = buildProfileContext(userId);
+247	        String prompt = "Based on this student profile, suggest the TOP 5 most suitable career paths.\n" +
+248	                "Student profile: " + profile + "\n\n" +
+249	                "For each career: name, why it suits THIS student, pros/cons, salary, time to first job, required exams/skills, competition level.\n" +
+250	                "Rank from most to least recommended. Be specific to India.";
+251	
+252	        String reply = callAiApi(singleTurn(
+253	                "You are CareerSetu AI Career Advisor. Give personalised career guidance for Indian students.", prompt));
+254	        return com.careersetu.dto.ai.AiChatResponse.builder().reply(reply).build();
+255	    }
+256	
+257	    public com.careersetu.dto.ai.AiChatResponse predictCollegeOrStream(Long userId,
+258	            com.careersetu.dto.ai.CollegePredictorRequest req) {
+259	        String prompt = String.format(
+260	                "A Class %s student needs guidance. Marks: %s, Stream: %s, Career goal: %s, State: %s, Category: %s.\n\n" +
+261	                "Provide: 1) Best stream/branch recommendation with reasons  2) Top 10 colleges they can target  " +
+262	                "3) Entrance exams to prepare  4) Alternative paths  5) Timeline & prep strategy  6) Career scope of top 3 options. " +
+263	                "Be specific to India.",
+264	                req.getCurrentClass(),
+265	                req.getPercentage() != null ? req.getPercentage() + "%" : "Not specified",
+266	                req.getStream() != null ? req.getStream() : "Not decided",
+267	                req.getCareerGoal() != null ? req.getCareerGoal() : "Not decided",
+268	                req.getState() != null ? req.getState() : "Not specified",
+269	                req.getCategory() != null ? req.getCategory() : "General");
+270	
+271	        String reply = callAiApi(singleTurn(
+272	                "You are CareerSetu AI College & Stream Advisor for Indian Class 10/12 students.", prompt));
+273	        return com.careersetu.dto.ai.AiChatResponse.builder().reply(reply).build();
+274	    }
+275	
+276	    public com.careersetu.dto.ai.AiChatResponse conductMockInterview(Long userId,
+277	            com.careersetu.dto.ai.InterviewCoachRequest req) {
+278	        String profile = buildProfileContext(userId);
+279	        String round   = req.getRound() != null ? req.getRound() : "technical";
+280	        String prompt;
+281	        if (req.getPreviousQuestion() != null && req.getPreviousAnswer() != null) {
+282	            prompt = String.format(
+283	                    "You are conducting a mock %s interview for: %s\nStudent profile: %s\n\n" +
+284	                    "Previous question: %s\nStudent answer: %s\n\n" +
+285	                    "1. Evaluate answer (Score X/10, what was good, what was missing)\n" +
+286	                    "2. Ideal answer\n3. Next interview question\n4. Tip for this question type\n" +
+287	                    "Format: EVALUATION | IDEAL ANSWER | NEXT QUESTION | TIP",
+288	                    round, req.getTargetRole(), profile, req.getPreviousQuestion(), req.getPreviousAnswer());
+289	        } else {
+290	            prompt = String.format(
+291	                    "Start a mock %s interview for: %s\nStudent profile: %s\n\n" +
+292	                    "1. Introduce yourself as interviewer  2. Explain what this round covers  " +
+293	                    "3. Ask the first question  4. Tell student how to respond.",
+294	                    round, req.getTargetRole(), profile);
+295	        }
+296	        String reply = callAiApi(singleTurn(
+297	                "You are an expert interviewer for Indian job seekers. Be realistic but encouraging.", prompt));
+298	        return com.careersetu.dto.ai.AiChatResponse.builder().reply(reply).build();
+299	    }
+300	
+301	    public com.careersetu.dto.ai.AiChatResponse getCareerGps(Long userId, String targetSalary, int targetYears) {
+302	        String profile = buildProfileContext(userId);
+303	        String prompt = String.format(
+304	                "Build a CAREER GPS for this student.\nProfile: %s\nTarget: Reach Rs.%s/month in %d years.\n\n" +
+305	                "Step-by-step GPS route: 1) Current position assessment  2) Year-by-year milestones  " +
+306	                "3) Skills to acquire (priority order)  4) Exams/certifications  5) Job switch strategy  " +
+307	                "6) Salary checkpoints  7) Risks & mitigation  8) Fastest vs safe route.\n" +
+308	                "Be very specific — exam names, company names, exact skills.",
+309	                profile, targetSalary, targetYears);
+310	        String reply = callAiApi(singleTurn(
+311	                "You are CareerSetu AI Career GPS. Create precise roadmaps for Indian students.", prompt));
+312	        return com.careersetu.dto.ai.AiChatResponse.builder().reply(reply).build();
+313	    }
+314	
+315	
+316	    /** Public helper used by ResumeBuilderController */
+317	    public com.careersetu.dto.ai.AiChatResponse reviewResumeViaAi(String prompt) {
+318	        String reply = callAiApi(singleTurn(
+319	                "You are an expert ATS resume reviewer for the Indian job market.", prompt));
+320	        return com.careersetu.dto.ai.AiChatResponse.builder().reply(reply).build();
+321	    }
+322	
+323	}
+
+==== FILE: careersetu-frontend\src\pages\AIAdvisor.jsx ====
+1	/**
+2	 * AIAdvisor — calls the backend /api/ai/* endpoints (which internally call Grok/OpenAI).
+3	 * No API keys in frontend. Requires login for AI calls (backend is secured).
+4	 */
+5	import { useState, useRef, useEffect } from 'react';
+6	import { Link, useNavigate } from 'react-router-dom';
+7	import { Send, Sparkles, Bot, User, Download, RefreshCw, ChevronRight, LogIn } from 'lucide-react';
+8	import { useAuth } from '../context/AuthContext';
+9	import { aiService } from '../services/services';
+10	import './AIAdvisor.css';
+11	
+12	const samplePrompts = [
+13	  'Best govt exams for BSc Computer Science graduate?',
+14	  'TCS vs Infosys salary comparison for freshers',
+15	  'Generate 3-month SSC CGL preparation plan',
+16	  'What skills do I need for a Data Analyst job?',
+17	  'Which stream is better after 10th for IAS?',
+18	  'How to crack UPSC in first attempt?',
+19	];
+20	
+21	const quickActions = [
+22	  { icon: '🗺️', label: 'Generate Roadmap',   apiCall: (msg) => aiService.generateRoadmap({ goal: msg }) },
+23	  { icon: '💰', label: 'Salary Predictor',    prompt: 'Predict my salary growth in next 3 years' },
+24	  { icon: '🎯', label: 'Career Guidance',     apiCall: () => aiService.careerGuidance() },
+25	  { icon: '🔍', label: 'Skill Gap Analysis',  prompt: 'Analyze my skill gaps for my target job' },
+26	  { icon: '🏢', label: 'College Predictor',   prompt: 'Which college should I target based on my profile?' },
+27	  { icon: '🎤', label: 'Interview Coach',     apiCall: (msg) => aiService.interviewCoach({ role: msg, question: '', userAnswer: '' }) },
+28	];
+29	
+30	// Simple markdown renderer
+31	const renderText = (text) =>
+32	  text
+33	    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+34	    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+35	    .replace(/^• /gm, '&bull; ')
+36	    .replace(/\n/g, '<br/>');
+37	
+38	export default function AIAdvisor() {
+39	  const { isLoggedIn } = useAuth();
+40	  const navigate = useNavigate();
+41	
+42	  const [conversationId, setConversationId] = useState(null);
+43	  const [messages, setMessages] = useState([
+44	    {
+45	      role: 'ai',
+46	      text: `👋 **Hello! I'm CareerSetu's AI Career Advisor.**\n\nI can help you with:\n• 🏛️ Government exam guidance (SSC, UPSC, Banking, Railway)\n• 💼 Private sector career advice\n• 🗺️ Personalized study roadmaps\n• 🔍 Skill gap analysis\n• 💰 Salary predictions\n• 🎤 Interview preparation\n\n**Tell me about yourself** — your qualification, stream, and career goal — and I'll give you personalized guidance!`,
+47	    },
+48	  ]);
+49	  const [input, setInput] = useState('');
+50	  const [loading, setLoading] = useState(false);
+51	  const messagesEndRef = useRef(null);
+52	
+53	  useEffect(() => {
+54	    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+55	  }, [messages]);
+56	
+57	  const sendMessage = async (text) => {
+58	    const msg = text || input.trim();
+59	    if (!msg || loading) return;
+60	
+61	    if (!isLoggedIn) {
+62	      navigate('/login');
+63	      return;
+64	    }
+65	
+66	    setInput('');
+67	    setMessages((prev) => [...prev, { role: 'user', text: msg }]);
+68	    setLoading(true);
+69	
+70	    try {
+71	      const payload = {
+72	        message: msg,
+73	        ...(conversationId && { conversationId }),
+74	      };
+75	      const res = await aiService.chat(payload);
+76	      const aiData = res.data;                   // AiChatResponse
+77	      if (aiData.conversationId) setConversationId(aiData.conversationId);
+78	      setMessages((prev) => [...prev, { role: 'ai', text: aiData.reply || aiData.message || '' }]);
+79	    } catch (err) {
+80	      const isLimit = err.message?.toLowerCase().includes('limit') ||
+81	                      err.message?.toLowerCase().includes('quota');
+82	      setMessages((prev) => [
+83	        ...prev,
+84	        {
+85	          role: 'ai',
+86	          text: isLimit
+87	            ? '⚠️ You have reached your daily AI query limit. **Upgrade to Premium** for unlimited queries!'
+88	            : `Sorry, something went wrong: ${err.message}. Please try again.`,
+89	        },
+90	      ]);
+91	    } finally {
+92	      setLoading(false);
+93	    }
+94	  };
+95	
+96	  const handleQuickAction = async (qa) => {
+97	    if (!isLoggedIn) { navigate('/login'); return; }
+98	
+99	    if (qa.prompt) {
+100	      sendMessage(qa.prompt);
+101	      return;
+102	    }
+103	
+104	    // Actions with dedicated endpoints
+105	    setLoading(true);
+106	    setMessages((prev) => [...prev, { role: 'user', text: qa.label }]);
+107	    try {
+108	      const res = await qa.apiCall(qa.label);
+109	      const aiData = res.data;
+110	      setMessages((prev) => [...prev, { role: 'ai', text: aiData.reply || aiData.message || '' }]);
+111	    } catch (err) {
+112	      setMessages((prev) => [...prev, { role: 'ai', text: `Error: ${err.message}` }]);
+113	    } finally {
+114	      setLoading(false);
+115	    }
+116	  };
+117	
+118	  const clearChat = () => {
+119	    setConversationId(null);
+120	    setMessages([{
+121	      role: 'ai',
+122	      text: `👋 Chat cleared! I'm ready to help you again. What would you like to know about your career?`,
+123	    }]);
+124	  };
+125	
+126	  return (
+127	    <div className="ai-advisor-page">
+128	      {/* Header */}
+129	      <div className="ai-advisor-header">
+130	        <div className="container">
+131	          <div className="aah-content">
+132	            <div className="aah-left">
+133	              <div className="breadcrumb" style={{ color: 'rgba(255,255,255,0.6)' }}>
+134	                <Link to="/" style={{ color: 'rgba(255,255,255,0.7)' }}>Home</Link>
+135	                <ChevronRight size={12} /> <span>AI Career Advisor</span>
+136	              </div>
+137	              <h1 className="aah-title">
+138	                <Sparkles size={24} /> AI Career Advisor
+139	                <span className="badge badge-purple" style={{ marginLeft: 10, fontSize: 11 }}>
+140	                  Powered by AI
+141	                </span>
+142	              </h1>
+143	              <p className="aah-sub">
+144	                Get personalized career guidance. Ask anything about exams, jobs, roadmaps, and more.
+145	              </p>
+146	            </div>
+147	            <div className="aah-stats">
+148	              <div className="aah-stat"><div className="aah-stat-num">2M+</div><div className="aah-stat-label">Questions Answered</div></div>
+149	              <div className="aah-stat"><div className="aah-stat-num">98%</div><div className="aah-stat-label">Satisfaction Rate</div></div>
+150	              <div className="aah-stat"><div className="aah-stat-num">24/7</div><div className="aah-stat-label">Available</div></div>
+151	            </div>
+152	          </div>
+153	        </div>
+154	      </div>
+155	
+156	      <div className="container" style={{ padding: '24px 20px' }}>
+157	        <div className="ai-advisor-grid">
+158	          {/* Chat area */}
+159	          <div className="chat-container card">
+160	            <div className="chat-toolbar">
+161	              <div className="chat-toolbar-left">
+162	                <Bot size={18} style={{ color: 'var(--purple)' }} />
+163	                <span className="chat-title">CareerSetu AI</span>
+164	                <span className="online-dot"></span>
+165	                <span style={{ fontSize: 12, color: 'var(--secondary)' }}>Online</span>
+166	              </div>
+167	              <div className="chat-toolbar-right">
+168	                <button className="icon-btn" title="Clear chat" onClick={clearChat}><RefreshCw size={15} /></button>
+169	                <button className="icon-btn" title="Download conversation"><Download size={15} /></button>
+170	              </div>
+171	            </div>
+172	
+173	            <div className="chat-messages">
+174	              {messages.map((msg, i) => (
+175	                <div key={i} className={`chat-message ${msg.role}`}>
+176	                  <div className="chat-avatar">
+177	                    {msg.role === 'ai'
+178	                      ? <div className="ai-avatar-icon"><Bot size={16} /></div>
+179	                      : <div className="user-avatar-icon"><User size={16} /></div>}
+180	                  </div>
+181	                  <div className="chat-bubble">
+182	                    <div
+183	                      className="chat-bubble-text"
+184	                      dangerouslySetInnerHTML={{ __html: renderText(msg.text) }}
+185	                    />
+186	                  </div>
+187	                </div>
+188	              ))}
+189	              {loading && (
+190	                <div className="chat-message ai">
+191	                  <div className="chat-avatar"><div className="ai-avatar-icon"><Bot size={16} /></div></div>
+192	                  <div className="chat-bubble">
+193	                    <div className="typing-indicator"><span /><span /><span /></div>
+194	                  </div>
+195	                </div>
+196	              )}
+197	              <div ref={messagesEndRef} />
+198	            </div>
+199	
+200	            {/* Sample prompts */}
+201	            {messages.length <= 2 && (
+202	              <div className="sample-prompts">
+203	                <div className="sample-prompts-title">Try asking:</div>
+204	                <div className="sample-prompts-grid">
+205	                  {samplePrompts.map((p) => (
+206	                    <button key={p} className="sample-prompt-btn" onClick={() => sendMessage(p)}>
+207	                      {p}
+208	                    </button>
+209	                  ))}
+210	                </div>
+211	              </div>
+212	            )}
+213	
+214	            {/* Login prompt if not logged in */}
+215	            {!isLoggedIn && (
+216	              <div className="chat-login-prompt">
+217	                <LogIn size={16} />
+218	                <span>Please <Link to="/login" style={{ color: 'var(--primary)', fontWeight: 600 }}>login</Link> to chat with the AI advisor</span>
+219	              </div>
+220	            )}
+221	
+222	            {/* Input */}
+223	            <div className="chat-input-area">
+224	              <div className="chat-input-wrap">
+225	                <textarea
+226	                  value={input}
+227	                  onChange={(e) => setInput(e.target.value)}
+228	                  onKeyDown={(e) => {
+229	                    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+230	                  }}
+231	                  placeholder={
+232	                    isLoggedIn
+233	                      ? 'Ask anything about your career, exams, jobs...'
+234	                      : 'Login to start chatting...'
+235	                  }
+236	                  className="chat-textarea"
+237	                  rows={2}
+238	                  disabled={!isLoggedIn}
+239	                />
+240	                <div className="chat-input-actions">
+241	                  <button
+242	                    className={`chat-send-btn ${input.trim() ? 'active' : ''}`}
+243	                    onClick={() => sendMessage()}
+244	                    disabled={!input.trim() || loading || !isLoggedIn}
+245	                  >
+246	                    <Send size={16} />
+247	                  </button>
+248	                </div>
+249	              </div>
+250	              <p className="chat-disclaimer">
+251	                AI responses are for guidance only. Always verify from official sources.
+252	              </p>
+253	            </div>
+254	          </div>
+255	
+256	          {/* Right panel */}
+257	          <div className="ai-right-panel">
+258	            <div className="sidebar-widget card-flat">
+259	              <h3 className="sw-title">⚡ Quick Actions</h3>
+260	              <div className="quick-actions-list">
+261	                {quickActions.map((qa) => (
+262	                  <button
+263	                    key={qa.label}
+264	                    className="quick-action-btn"
+265	                    onClick={() => handleQuickAction(qa)}
+266	                  >
+267	                    <span className="qa-icon">{qa.icon}</span>
+268	                    <span className="qa-label">{qa.label}</span>
+269	                    <ChevronRight size={14} style={{ marginLeft: 'auto', color: 'var(--text-muted)' }} />
+270	                  </button>
+271	                ))}
+272	              </div>
+273	            </div>
+274	
+275	            {!isLoggedIn && (
+276	              <div className="premium-sidebar card" style={{ marginTop: 16 }}>
+277	                <div className="premium-crown">🔐</div>
+278	                <h3>Login Required</h3>
+279	                <p>Login to start chatting with the AI advisor</p>
+280	                <Link to="/login" className="btn btn-primary btn-sm w-full" style={{ justifyContent: 'center', marginTop: 10 }}>
+281	                  Login / Register Free
+282	                </Link>
+283	              </div>
+284	            )}
+285	
+286	            {isLoggedIn && (
+287	              <div className="premium-sidebar card" style={{ marginTop: 16 }}>
+288	                <div className="premium-crown">👑</div>
+289	                <h3>Go Premium</h3>
+290	                <p>Unlimited AI queries + save conversations</p>
+291	                <Link to="/premium" className="btn btn-accent btn-sm w-full" style={{ justifyContent: 'center', marginTop: 10 }}>
+292	                  Upgrade — ₹99/mo
+293	                </Link>
+294	              </div>
+295	            )}
+296	
+297	            <div className="sidebar-widget card-flat" style={{ marginTop: 16 }}>
+298	              <h3 className="sw-title">💡 Pro Tips</h3>
+299	              {[
+300	                'Mention your qualification for tailored advice',
+301	                'Ask for step-by-step study plans',
+302	                'Compare exams to find the best fit',
+303	                'Ask for salary predictions by location',
+304	              ].map((tip, i) => (
+305	                <div key={i} className="tip-item">
+306	                  <span className="tip-num">{i + 1}</span>
+307	                  <span className="tip-text">{tip}</span>
+308	                </div>
+309	              ))}
+310	            </div>
+311	          </div>
+312	        </div>
+313	      </div>
+314	    </div>
+315	  );
+316	}
+
+==== FILE: careersetu-backend\pom.xml ====
+1	<?xml version="1.0" encoding="UTF-8"?>
+2	<project xmlns="http://maven.apache.org/POM/4.0.0"
+3	         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+4	         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+5	    <modelVersion>4.0.0</modelVersion>
+6	
+7	    <parent>
+8	        <groupId>org.springframework.boot</groupId>
+9	        <artifactId>spring-boot-starter-parent</artifactId>
+10	        <version>3.2.0</version>
+11	        <relativePath/>
+12	    </parent>
+13	
+14	    <groupId>com.careersetu</groupId>
+15	    <artifactId>careersetu-backend</artifactId>
+16	    <version>1.0.0</version>
+17	    <name>CareerSetu Backend</name>
+18	    <description>India's AI-Powered Career Operating System — Spring Boot + PostgreSQL + JWT</description>
+19	
+20	    <properties>
+21	    <java.version>17</java.version>
+22	    <jjwt.version>0.11.5</jjwt.version>
+23	    <postgresql.version>42.7.3</postgresql.version>
+24	</properties>
+25	
+26	    <dependencies>
+27	        <!-- Spring Boot Core -->
+28	        <dependency>
+29	            <groupId>org.springframework.boot</groupId>
+30	            <artifactId>spring-boot-starter-web</artifactId>
+31	        </dependency>
+32	        <dependency>
+33	            <groupId>org.springframework.boot</groupId>
+34	            <artifactId>spring-boot-starter-data-jpa</artifactId>
+35	        </dependency>
+36	        <dependency>
+37	            <groupId>org.springframework.boot</groupId>
+38	            <artifactId>spring-boot-starter-security</artifactId>
+39	        </dependency>
+40	        <dependency>
+41	            <groupId>org.springframework.boot</groupId>
+42	            <artifactId>spring-boot-starter-validation</artifactId>
+43	        </dependency>
+44	        <dependency>
+45	            <groupId>org.springframework.boot</groupId>
+46	            <artifactId>spring-boot-starter-mail</artifactId>
+47	        </dependency>
+48	
+49	        <!-- PostgreSQL -->
+50	        <dependency>
+51	            <groupId>org.postgresql</groupId>
+52	            <artifactId>postgresql</artifactId>
+53	            <scope>runtime</scope>
+54	        </dependency>
+55	
+56	        <!-- JWT -->
+57	        <dependency>
+58	            <groupId>io.jsonwebtoken</groupId>
+59	            <artifactId>jjwt-api</artifactId>
+60	            <version>${jjwt.version}</version>
+61	        </dependency>
+62	        <dependency>
+63	            <groupId>io.jsonwebtoken</groupId>
+64	            <artifactId>jjwt-impl</artifactId>
+65	            <version>${jjwt.version}</version>
+66	            <scope>runtime</scope>
+67	        </dependency>
+68	        <dependency>
+69	            <groupId>io.jsonwebtoken</groupId>
+70	            <artifactId>jjwt-jackson</artifactId>
+71	            <version>${jjwt.version}</version>
+72	            <scope>runtime</scope>
+73	        </dependency>
+74	
+75	        <!-- Lombok -->
+76	        <dependency>
+77	            <groupId>org.projectlombok</groupId>
+78	            <artifactId>lombok</artifactId>
+79	            <optional>true</optional>
+80	        </dependency>
+81	
+82	        <!-- OpenAPI / Swagger UI -->
+83	        <dependency>
+84	            <groupId>org.springdoc</groupId>
+85	            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+86	            <version>2.3.0</version>
+87	        </dependency>
+88	
+89	        <!-- Jackson Java 8 date/time -->
+90	        <dependency>
+91	            <groupId>com.fasterxml.jackson.datatype</groupId>
+92	            <artifactId>jackson-datatype-jsr310</artifactId>
+93	        </dependency>
+94	
+95	        <!-- Test -->
+96	        <dependency>
+97	            <groupId>org.springframework.boot</groupId>
+98	            <artifactId>spring-boot-starter-test</artifactId>
+99	            <scope>test</scope>
+100	        </dependency>
+101	        <dependency>
+102	            <groupId>org.springframework.security</groupId>
+103	            <artifactId>spring-security-test</artifactId>
+104	            <scope>test</scope>
+105	        </dependency>
+106	    </dependencies>
+107	
+108	    <build>
+109	        <plugins>
+110	            <plugin>
+111	                <groupId>org.springframework.boot</groupId>
+112	                <artifactId>spring-boot-maven-plugin</artifactId>
+113	                <configuration>
+114	                    <excludes>
+115	                        <exclude>
+116	                            <groupId>org.projectlombok</groupId>
+117	                            <artifactId>lombok</artifactId>
+118	                        </exclude>
+119	                    </excludes>
+120	                </configuration>
+121	            </plugin>
+122	        </plugins>
+123	    </build>
+124	</project>
