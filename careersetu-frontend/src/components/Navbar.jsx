@@ -42,9 +42,9 @@ export default function Navbar() {
     <nav className="navbar">
       <div className="navbar-inner">
         <Link to="/" className="navbar-logo">
-          <div className="logo-icon">CS</div>
+          <div className="logo-icon">A</div>
           <div className="logo-text">
-            <span className="logo-main">CareerSetu</span>
+            <span className="logo-main">Airojgar</span>
             <span className="logo-tagline">Your Career, Our Guidance</span>
           </div>
         </Link>

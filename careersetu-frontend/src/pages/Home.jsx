@@ -331,9 +331,9 @@ export default function Home() {
                 ))}
               </div>
 
-              {/* Why CareerSetu */}
+              {/* Why Airojgar */}
               <div className="why-section">
-                <h2 className="section-title" style={{textAlign:'center',marginBottom:32}}>Why Choose CareerSetu?</h2>
+                <h2 className="section-title" style={{textAlign:'center',marginBottom:32}}>Why Choose Airojgar?</h2>
                 <div className="why-grid">
                   {[
                     { icon: '🎯', title: 'All in One Platform', sub: 'Everything in one place' },
@@ -389,7 +389,7 @@ export default function Home() {
           <div className="cta-grid">
             <div>
               <h2>Ready to Build Your Dream Career?</h2>
-              <p>Join thousands of students who are already achieving their goals with CareerSetu...</p>
+              <p>Join thousands of students who are already achieving their goals with Airojgar...</p>
               <Link to="/register" className="btn btn-accent btn-lg" style={{marginTop:20}}>
                 Get Started For Free <ArrowRight size={16} />
               </Link>
