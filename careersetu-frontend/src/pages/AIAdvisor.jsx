@@ -53,7 +53,7 @@ export default function AIAdvisor() {
   const [resumeUploading, setResumeUploading] = useState(false);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }, [messages]);
 
   const sendMessage = async (text) => {
