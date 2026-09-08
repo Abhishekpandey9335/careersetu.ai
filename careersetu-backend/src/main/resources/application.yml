@@ -11,6 +11,10 @@ spring:
       maximum-pool-size: 10
       minimum-idle: 2
       connection-timeout: 20000
+      max-lifetime: 25000
+      idle-timeout: 10000
+      validation-timeout: 5000
+      keepalive-time: 15000
 
   jpa:
     hibernate:
@@ -57,7 +61,7 @@ razorpay:
   key-secret: ${RAZORPAY_KEY_SECRET:}
 
 cors:
-  allowed-origins: ${CORS_ORIGINS:http://localhost:5173,https://careersetu.in}
+  allowed-origins: ${CORS_ORIGINS:http://localhost:5173,https://careersetu.in,https://airojgar.in,https://www.airojgar.in,https://careersetu-ai-one.vercel.app}
 
 springdoc:
   api-docs:
@@ -69,18 +73,3 @@ logging:
   level:
     com.careersetu: DEBUG
     org.springframework.security: WARN
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
