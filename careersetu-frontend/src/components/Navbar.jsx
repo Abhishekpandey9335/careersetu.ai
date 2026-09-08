@@ -44,7 +44,7 @@ export default function Navbar() {
         <Link to="/" className="navbar-logo">
           <div className="logo-icon">A</div>
           <div className="logo-text">
-            <span className="logo-main">Airojgar</span>
+            <span className="logo-main">Ai Rojgar</span>
             <span className="logo-tagline">Your Career, Our Guidance</span>
           </div>
         </Link>
