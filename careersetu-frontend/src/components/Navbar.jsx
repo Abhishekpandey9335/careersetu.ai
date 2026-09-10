@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Search, Bell, Menu, X, ChevronDown, Sparkles, LogOut, LayoutDashboard, Crown, BookOpen } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import logo from '../assets/logo.png';
 import './Navbar.css';
 
 const navLinks = [
@@ -42,11 +43,7 @@ export default function Navbar() {
     <nav className="navbar">
       <div className="navbar-inner">
         <Link to="/" className="navbar-logo">
-          <div className="logo-icon">A</div>
-          <div className="logo-text">
-            <span className="logo-main">Ai Rojgar</span>
-            <span className="logo-tagline">Your Career, Our Guidance</span>
-          </div>
+          <img src={logo} alt="Airojgar.in" className="logo-image" />
         </Link>
 
         <div className="navbar-links">

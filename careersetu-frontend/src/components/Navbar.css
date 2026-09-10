@@ -248,3 +248,8 @@
   .logo-tagline { display: none; }
   .search-form { width: 180px; }
 }
+.logo-image {
+  height: 40px;   /* apni navbar height ke hisab se adjust kar lena */
+  width: auto;
+  display: block;
+}
