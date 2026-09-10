@@ -19,7 +19,7 @@ export default function Careers() {
       <div className="container" style={{ padding: '48px 20px' }}>
         {/* Why Join */}
         <div className="card" style={{ padding: 32, marginBottom: 32 }}>
-          <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 20, color: 'var(--primary)' }}>Why Join CareerSetu?</h2>
+          <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 20, color: 'var(--primary)' }}>Why Join Ai Rojgar?</h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
             {[
               { icon: '🚀', title: 'High Impact Work', desc: 'Your work will directly impact millions of students\' lives and career journeys.' },
@@ -52,7 +52,7 @@ export default function Careers() {
                     <span className="badge badge-success">💼 {job.exp}</span>
                   </div>
                 </div>
-                <a href={`mailto:abhishekpandit08939@gmail.com?subject=Application for ${job.title}`} className="btn btn-primary btn-sm">Apply Now</a>
+                <a href={`mailto:airojgar8@gmail.com?subject=Application for ${job.title}`} className="btn btn-primary btn-sm">Apply Now</a>
               </div>
               <p style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.7, marginBottom: 12 }}>{job.desc}</p>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -66,7 +66,7 @@ export default function Careers() {
         <div style={{ background: 'linear-gradient(135deg, #1a56db, #7e3af2)', borderRadius: 16, padding: 32, textAlign: 'center', color: 'white' }}>
           <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 12 }}>Don't see a role for you?</h2>
           <p style={{ opacity: 0.9, marginBottom: 20 }}>Send us your resume and we'll reach out when a suitable position opens up.</p>
-          <a href="mailto:abhishekpandit08939@gmail.com?subject=General Application - CareerSetu" className="btn" style={{ background: 'white', color: '#1a56db', fontWeight: 700, padding: '10px 28px', borderRadius: 8 }}>Send Resume →</a>
+          <a href="mailto:airojgar8@gmail.com?subject=General Application - Ai Rojgar" className="btn" style={{ background: 'white', color: '#1a56db', fontWeight: 700, padding: '10px 28px', borderRadius: 8 }}>Send Resume →</a>
         </div>
       </div>
     </div>

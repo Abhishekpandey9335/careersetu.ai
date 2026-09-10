@@ -112,7 +112,7 @@ function PremiumReceipts() {
               fontSize: 13, color: '#92400e'
             }}>
               ⏳ Payment verification in progress. Premium will be activated within 2–4 hours.
-              Need help? Email: <strong>abhishekpandit08939@gmail.com</strong>
+              Need help? Email: <strong>airojgar8@gmail.com</strong>
             </div>
           )}
 
@@ -122,7 +122,7 @@ function PremiumReceipts() {
               background: '#def7ec', borderRadius: 8,
               fontSize: 13, color: '#0e9f6e'
             }}>
-              ✅ Premium is active! Enjoy all CareerSetu Premium features.
+              ✅ Premium is active! Enjoy all Ai Rojgar Premium features.
             </div>
           )}
         </div>

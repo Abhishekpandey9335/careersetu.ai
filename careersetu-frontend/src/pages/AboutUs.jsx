@@ -5,7 +5,7 @@ export default function AboutUs() {
     <div style={{ background: 'var(--bg)', minHeight: '100vh' }}>
       {/* Hero */}
       <div style={{ background: 'linear-gradient(135deg, #1a56db 0%, #7e3af2 100%)', padding: '60px 20px', textAlign: 'center', color: 'white' }}>
-        <h1 style={{ fontSize: 36, fontWeight: 800, marginBottom: 12 }}>About CareerSetu</h1>
+        <h1 style={{ fontSize: 36, fontWeight: 800, marginBottom: 12 }}>About Ai Rojgar</h1>
         <p style={{ fontSize: 18, opacity: 0.9, maxWidth: 600, margin: '0 auto' }}>India's #1 AI-Powered Career Guidance Platform — Empowering millions of students to achieve their dream careers.</p>
       </div>
 
@@ -14,7 +14,7 @@ export default function AboutUs() {
         <div className="card" style={{ padding: 32, marginBottom: 24 }}>
           <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 16, color: 'var(--primary)' }}>🎯 Our Mission</h2>
           <p style={{ fontSize: 15, lineHeight: 1.8, color: 'var(--text-muted)' }}>
-            At CareerSetu, our mission is to bridge the gap between aspirants and their dream careers. We believe every student in India deserves access to quality career guidance, exam preparation resources, and job opportunities — regardless of their background or financial status. We are committed to providing a comprehensive, AI-powered platform that makes career planning simple, personalized, and accessible to all.
+            At Ai Rojgar, our mission is to bridge the gap between aspirants and their dream careers. We believe every student in India deserves access to quality career guidance, exam preparation resources, and job opportunities — regardless of their background or financial status. We are committed to providing a comprehensive, AI-powered platform that makes career planning simple, personalized, and accessible to all.
           </p>
         </div>
 
@@ -49,7 +49,7 @@ export default function AboutUs() {
 
         {/* Stats */}
         <div className="card" style={{ padding: 32, marginBottom: 24 }}>
-          <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 24, color: 'var(--primary)' }}>📊 CareerSetu in Numbers</h2>
+          <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 24, color: 'var(--primary)' }}>📊 Ai Rojgar in Numbers</h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 20, textAlign: 'center' }}>
             {[
               { num: '50L+', label: 'Students Served' },
@@ -78,12 +78,12 @@ export default function AboutUs() {
             />
             <div style={{ flex: 1, minWidth: 200 }}>
               <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>Abhishek Pandey</h3>
-              <p style={{ color: 'var(--primary)', fontSize: 14, marginBottom: 12 }}>Founder & CEO, CareerSetu | Varanasi, Uttar Pradesh, India</p>
+              <p style={{ color: 'var(--primary)', fontSize: 14, marginBottom: 12 }}>Founder & CEO, Ai Rojgar | Varanasi, Uttar Pradesh, India</p>
               <p style={{ fontSize: 14, lineHeight: 1.8, color: 'var(--text-muted)', marginBottom: 12 }}>
-                Abhishek Pandey is a passionate technologist and career mentor from Varanasi, Uttar Pradesh. Having witnessed firsthand the struggles of millions of students in finding the right career guidance, he founded CareerSetu with a vision to democratize career counseling using the power of Artificial Intelligence. With deep expertise in software development and a strong understanding of India's competitive exam ecosystem, Abhishek has built CareerSetu as a one-stop solution for every career need — from government job notifications to private sector placements, AI-powered guidance to personalized roadmaps. He believes that no dream is too big when backed by the right guidance, and his relentless drive continues to push CareerSetu towards empowering every student in India to achieve their true potential.
+                Abhishek Pandey is a passionate technologist and career mentor from Varanasi, Uttar Pradesh. Having witnessed firsthand the struggles of millions of students in finding the right career guidance, he founded Ai Rojgar with a vision to democratize career counseling using the power of Artificial Intelligence. With deep expertise in software development and a strong understanding of India's competitive exam ecosystem, Abhishek has built CareerSetu as a one-stop solution for every career need — from government job notifications to private sector placements, AI-powered guidance to personalized roadmaps. He believes that no dream is too big when backed by the right guidance, and his relentless drive continues to push Ai Rojgar towards empowering every student in India to achieve their true potential.
               </p>
               <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.8 }}>
-                📞 9335203841 &nbsp;|&nbsp; ✉️ abhishekpandit08939@gmail.com<br />
+                📞 9335203841 &nbsp;|&nbsp; ✉️ airojgar8@gmail.com<br />
                 📍 Varanasi, Uttar Pradesh, India
               </p>
             </div>

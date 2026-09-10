@@ -248,7 +248,7 @@ function UPIModal({ plan, onClose, onSuccess }) {
 
         <p style={{ fontSize: 11, color: 'var(--text-muted)', textAlign: 'center', marginTop: 12 }}>
           After verification, premium will be activated within 2–4 hours.<br />
-          Support: abhishekpandit08939@gmail.com
+          Support: airojgar8@gmail.com
         </p>
       </div>
     </div>
@@ -278,11 +278,11 @@ export default function Premium() {
           <div style={{ fontSize: 64, marginBottom: 20 }}>🎉</div>
           <h1 style={{ fontSize: 28, fontWeight: 800, marginBottom: 12 }}>Payment Received!</h1>
           <p style={{ color: 'var(--text-muted)', maxWidth: 480, margin: '0 auto 16px' }}>
-            Thank you for subscribing to CareerSetu Premium! Your account will be activated within{' '}
+            Thank you for subscribing to Ai Rojgar Premium! Your account will be activated within{' '}
             <strong>2–4 hours</strong> after payment verification.
           </p>
           <p style={{ color: 'var(--text-muted)', fontSize: 13, marginBottom: 28 }}>
-            For any issues contact: abhishekpandit08939@gmail.com
+            For any issues contact: airojgar8@gmail.com
           </p>
           <Link to="/dashboard" className="btn btn-primary btn-lg">
             Go to Dashboard →
@@ -309,7 +309,7 @@ export default function Premium() {
             <div className="premium-hero-badge"><Crown size={16} /> Premium Plans</div>
             <h1 className="premium-hero-title">
               Supercharge Your Career with<br />
-              <span className="gradient-text">CareerSetu Premium</span>
+              <span className="gradient-text">Ai Rojgar Premium</span>
             </h1>
             <p className="premium-hero-sub">
               Unlock unlimited AI guidance, premium study material, mock interviews, and more.

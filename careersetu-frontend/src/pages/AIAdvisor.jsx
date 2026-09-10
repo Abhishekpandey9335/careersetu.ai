@@ -43,7 +43,7 @@ export default function AIAdvisor() {
   const [messages, setMessages] = useState([
     {
       role: 'ai',
-      text: `👋 **Hello! I'm CareerSetu's AI Career Advisor.**\n\nI can help you with:\n• 🏛️ Government exam guidance (SSC, UPSC, Banking, Railway)\n• 💼 Private sector career advice\n• 🗺️ Personalized study roadmaps\n• 🔍 Skill gap analysis\n• 💰 Salary predictions\n• 🎤 Interview preparation\n\n**Tell me about yourself** — your qualification, stream, and career goal — and I'll give you personalized guidance!`,
+      text: `👋 **Hello! I'm Ai Advisor AI Career Advisor.**\n\nI can help you with:\n• 🏛️ Government exam guidance (SSC, UPSC, Banking, Railway)\n• 💼 Private sector career advice\n• 🗺️ Personalized study roadmaps\n• 🔍 Skill gap analysis\n• 💰 Salary predictions\n• 🎤 Interview preparation\n\n**Tell me about yourself** — your qualification, stream, and career goal — and I'll give you personalized guidance!`,
     },
   ]);
   const [input, setInput] = useState('');
@@ -181,7 +181,7 @@ export default function AIAdvisor() {
             <div className="chat-toolbar">
               <div className="chat-toolbar-left">
                 <Bot size={18} style={{ color: 'var(--purple)' }} />
-                <span className="chat-title">CareerSetu AI</span>
+                <span className="chat-title">Ai Rojgar AI</span>
                 <span className="online-dot"></span>
                 <span style={{ fontSize: 12, color: 'var(--secondary)' }}>Online</span>
               </div>

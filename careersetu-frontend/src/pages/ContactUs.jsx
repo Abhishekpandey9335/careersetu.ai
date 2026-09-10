@@ -20,7 +20,7 @@ export default function ContactUs() {
       <div className="container" style={{ padding: '48px 20px' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 24, marginBottom: 32 }}>
           {[
-            { icon: <Mail size={24} />, title: 'Email Us', info: 'abhishekpandit08939@gmail.com', sub: 'We reply within 24 hours', color: '#1a56db' },
+            { icon: <Mail size={24} />, title: 'Email Us', info: 'airojgar8@gmail.com', sub: 'We reply within 24 hours', color: '#1a56db' },
             { icon: <Phone size={24} />, title: 'Call Us', info: '+91 9335203841', sub: 'Mon–Sat, 9 AM – 6 PM IST', color: '#0e9f6e' },
             { icon: <MapPin size={24} />, title: 'Our Location', info: 'Varanasi, Uttar Pradesh', sub: 'India — 221001', color: '#7e3af2' },
             { icon: <Clock size={24} />, title: 'Working Hours', info: 'Mon – Saturday', sub: '9:00 AM – 6:00 PM IST', color: '#f59e0b' },
@@ -82,11 +82,11 @@ export default function ContactUs() {
             <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 24, color: 'var(--primary)' }}>Frequently Asked Questions</h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               {[
-                { q: 'Is CareerSetu free to use?', a: 'Yes! CareerSetu is 100% free to get started. We offer both free and premium plans. The free plan includes access to all exam notifications, job listings, and basic study materials.' },
+                { q: 'Is Ai Rojgar free to use?', a: 'Yes! Ai Rojgar is 100% free to get started. We offer both free and premium plans. The free plan includes access to all exam notifications, job listings, and basic study materials.' },
                 { q: 'How do I get personalized career recommendations?', a: 'Simply fill in your profile details on the homepage — your qualification, stream, and interests — and our AI system will instantly generate personalized recommendations for you.' },
                 { q: 'How often are job and exam notifications updated?', a: 'Our team updates job listings and exam notifications daily. We source information directly from official government and company websites to ensure accuracy.' },
                 { q: 'Can I apply for jobs directly through CareerSetu?', a: 'Yes, you can click "Apply Now" on any job or exam listing and you will be redirected to the official application page of the company or recruitment board.' },
-                { q: 'How do I contact support?', a: 'You can reach us via email at abhishekpandit08939@gmail.com or call us at +91 9335203841 during working hours (Mon–Sat, 9 AM – 6 PM IST).' },
+                { q: 'How do I contact support?', a: 'You can reach us via email at airojgar8@gmail.com or call us at +91 9335203841 during working hours (Mon–Sat, 9 AM – 6 PM IST).' },
               ].map((faq, i) => (
                 <div key={i} style={{ borderBottom: '1px solid var(--border)', paddingBottom: 16 }}>
                   <h4 style={{ fontSize: 14, fontWeight: 700, marginBottom: 6 }}>Q: {faq.q}</h4>

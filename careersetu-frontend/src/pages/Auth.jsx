@@ -37,7 +37,7 @@ export function Login() {
         <div className="auth-brand">
           <div className="auth-logo">CS</div>
           <div>
-            <div className="auth-brand-name">CareerSetu</div>
+            <div className="auth-brand-name">Ai Rojgar</div>
             <div className="auth-brand-tag">Your Career, Our Guidance</div>
           </div>
         </div>
@@ -61,7 +61,7 @@ export function Login() {
       <div className="auth-right">
         <div className="auth-card card">
           <h1 className="auth-title">Welcome Back!</h1>
-          <p className="auth-sub">Login to your CareerSetu account</p>
+          <p className="auth-sub">Login to your Ai Rojgar account</p>
 
           <ErrorBanner message={authError} />
 
@@ -109,7 +109,7 @@ export function Login() {
               style={{ justifyContent: 'center' }}
               disabled={authLoading}
             >
-              {authLoading ? 'Logging in...' : 'Login to CareerSetu'}
+              {authLoading ? 'Logging in...' : 'Login to Ai Rojgar'}
             </button>
           </form>
 
@@ -147,9 +147,9 @@ export function Register() {
     <div className="auth-page">
       <div className="auth-left">
         <div className="auth-brand">
-          <div className="auth-logo">CS</div>
+          <div className="auth-logo">Ai Rojgar</div>
           <div>
-            <div className="auth-brand-name">CareerSetu</div>
+            <div className="auth-brand-name">Ai Rojgar</div>
             <div className="auth-brand-tag">Your Career, Our Guidance</div>
           </div>
         </div>
