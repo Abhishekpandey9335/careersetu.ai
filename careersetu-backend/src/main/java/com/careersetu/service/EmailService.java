@@ -8,7 +8,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 
@@ -90,6 +91,32 @@ public class EmailService {
                 </div>
                 """, examName, userName, examName, vacancies, lastDate, applyUrl);
         sendHtml(to, "📋 New Form Open: " + examName, html);
+    }
+    /** Interview booking confirmation email */
+    @Async
+    public void sendInterviewConfirmation(String to, String userName, String interviewType,
+                                          String meetLink, LocalDateTime scheduledAt) {
+        String formattedDate = scheduledAt.format(DateTimeFormatter.ofPattern("dd MMM yyyy, hh:mm a"));
+        String html = String.format("""
+            <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px">
+              <div style="background:#059669;color:white;padding:24px;border-radius:8px 8px 0 0;text-align:center">
+                <h1 style="margin:0">✅ Mock Interview Confirmed!</h1>
+              </div>
+              <div style="background:#f9fafb;padding:24px;border:1px solid #e5e7eb;border-radius:0 0 8px 8px">
+                <p>Hi <strong>%s</strong>,</p>
+                <p>Your <strong>%s</strong> mock interview has been scheduled.</p>
+                <ul>
+                  <li><strong>Date & Time:</strong> %s</li>
+                  <li><strong>Meet Link:</strong> <a href="%s">%s</a></li>
+                </ul>
+                <p>Please join on time. Bring your resume and be ready to discuss your projects.</p>
+                <p style="color:#6b7280;font-size:12px;margin-top:20px">
+                  Questions? Contact airojgar8@gmail.com
+                </p>
+              </div>
+            </div>
+            """, userName, interviewType, formattedDate, meetLink, meetLink);
+        sendHtml(to, "✅ Your Mock Interview is Scheduled — Ai Rojgar", html);
     }
 
     /** Welcome email after registration */

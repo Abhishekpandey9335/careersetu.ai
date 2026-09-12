@@ -28,6 +28,14 @@ export default function Admin() {
   const [actionLoading, setActionLoading] = useState(null);
   const [message, setMessage] = useState('');
 
+  // --- Mock Interview bookings state ---
+  const [interviewBookings, setInterviewBookings] = useState([]);
+  const [ivFilter, setIvFilter] = useState('PENDING');
+  const [ivLoading, setIvLoading] = useState(false);
+  const [confirmModal, setConfirmModal] = useState(null);
+  const [meetLink, setMeetLink] = useState('');
+  const [scheduledAt, setScheduledAt] = useState('');
+
   const token = localStorage.getItem('accessToken');
 
   useEffect(() => {
@@ -40,6 +48,9 @@ export default function Admin() {
   useEffect(() => {
     if (activeTab === 'pdfPurchases') {
       fetchPdfPurchases('ALL');
+    }
+    if (activeTab === 'interviewBookings') {
+      fetchInterviewBookings('PENDING');
     }
   }, [activeTab]);
 
@@ -89,8 +100,22 @@ export default function Admin() {
     finally { setUsersLoading(false); }
   }
 
+  async function fetchInterviewBookings(status) {
+    setIvLoading(true);
+    try {
+      const url = status === 'ALL'
+        ? `${API}/admin/interview-bookings`
+        : `${API}/admin/interview-bookings?status=${status}`;
+      const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+      const data = await res.json();
+      setInterviewBookings(data.data || []);
+    } catch (e) { setInterviewBookings([]); }
+    finally { setIvLoading(false); }
+  }
+
   function changeFilter(f) { setFilter(f); fetchSubscriptions(f); }
   function changePdfFilter(f) { setPdfFilter(f); fetchPdfPurchases(f); }
+  function changeIvFilter(f) { setIvFilter(f); fetchInterviewBookings(f); }
 
   function switchTab(tab) {
     setActiveTab(tab);
@@ -147,6 +172,44 @@ export default function Admin() {
     finally { setActionLoading(null); setTimeout(() => setMessage(''), 4000); }
   }
 
+  async function confirmInterview() {
+    if (!meetLink.trim() || !scheduledAt) {
+      setMessage('❌ Meet link aur date/time dono bharo.');
+      setTimeout(() => setMessage(''), 3000);
+      return;
+    }
+    setActionLoading(confirmModal.id + '_ivConfirm');
+    try {
+      await fetch(`${API}/admin/interview-bookings/${confirmModal.id}/confirm`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ meetLink: meetLink.trim(), scheduledAt }),
+      });
+      setMessage('✅ Interview confirmed & email bhej di gayi.');
+      setConfirmModal(null);
+      setMeetLink('');
+      setScheduledAt('');
+      fetchInterviewBookings(ivFilter); fetchStats();
+    } catch (e) { setMessage('❌ Error: ' + e.message); }
+    finally { setActionLoading(null); setTimeout(() => setMessage(''), 4000); }
+  }
+
+  async function rejectInterview(id) {
+    if (!confirm('Reject karna chahte ho?')) return;
+    setActionLoading(id + '_ivReject');
+    try {
+      await fetch(`${API}/admin/interview-bookings/${id}/reject`, {
+        method: 'PUT', headers: { Authorization: `Bearer ${token}` }
+      });
+      setMessage('❌ Booking rejected.');
+      fetchInterviewBookings(ivFilter); fetchStats();
+    } catch (e) { setMessage('Error: ' + e.message); }
+    finally { setActionLoading(null); setTimeout(() => setMessage(''), 4000); }
+  }
+
   const tabStyle = (tab) => ({
     padding: '10px 20px', borderRadius: 8, border: 'none', cursor: 'pointer',
     fontWeight: 700, fontSize: 14,
@@ -189,6 +252,7 @@ export default function Admin() {
               { label: 'Pending Plans', value: stats.pendingSubscriptions, icon: '⏳', highlight: true },
               { label: 'Pending PDFs', value: stats.pendingPurchases, icon: '📄', highlight: true },
               { label: 'Approved PDFs', value: stats.approvedPurchases, icon: '🔓' },
+              { label: 'Pending Interviews', value: stats.pendingInterviewBookings, icon: '🎤', highlight: true },
             ].map(s => (
               <div key={s.label} style={{
                 background: s.highlight ? '#fffbeb' : '#fff',
@@ -212,6 +276,15 @@ export default function Admin() {
                 marginLeft: 6, background: '#ef4444', color: '#fff',
                 borderRadius: 10, padding: '1px 7px', fontSize: 11
               }}>{stats.pendingPurchases}</span>
+            )}
+          </button>
+          <button onClick={() => switchTab('interviewBookings')} style={tabStyle('interviewBookings')}>
+            🎤 Mock Interviews
+            {stats?.pendingInterviewBookings > 0 && (
+              <span style={{
+                marginLeft: 6, background: '#ef4444', color: '#fff',
+                borderRadius: 10, padding: '1px 7px', fontSize: 11
+              }}>{stats.pendingInterviewBookings}</span>
             )}
           </button>
           <button onClick={() => switchTab('users')} style={tabStyle('users')}>👥 Users</button>
@@ -343,6 +416,71 @@ export default function Admin() {
           </div>
         )}
 
+        {/* MOCK INTERVIEW BOOKINGS TAB */}
+        {activeTab === 'interviewBookings' && (
+          <div>
+            <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
+              {['PENDING', 'CONFIRMED', 'COMPLETED', 'REJECTED', 'ALL'].map(f => (
+                <button key={f} onClick={() => changeIvFilter(f)} style={filterBtnStyle(ivFilter, f)}>
+                  {f === 'PENDING' ? '⏳ Pending' : f === 'CONFIRMED' ? '✅ Confirmed' : f === 'COMPLETED' ? '🏁 Completed' : f === 'REJECTED' ? '❌ Rejected' : '📋 All'}
+                </button>
+              ))}
+            </div>
+            {ivLoading ? (
+              <div style={{ textAlign: 'center', padding: 40, color: '#64748b' }}>Loading...</div>
+            ) : interviewBookings.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: 40, background: '#fff', borderRadius: 12, color: '#64748b' }}>
+                No {ivFilter.toLowerCase()} bookings found.
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {interviewBookings.map(b => (
+                  <div key={b.id} style={{
+                    background: '#fff', borderRadius: 12, padding: 20,
+                    border: b.status === 'PENDING' ? '2px solid #f59e0b' : '1px solid #e2e8f0'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+                      <div>
+                        <div style={{ fontWeight: 800, fontSize: 16, marginBottom: 6 }}>🎤 {b.interviewType} — ₹{b.fee}</div>
+                        <div style={{ fontSize: 13, color: '#64748b', marginBottom: 4 }}>🆔 #{b.id} &nbsp;|&nbsp; 📅 {new Date(b.createdAt).toLocaleString('en-IN')}</div>
+                        <div style={{ fontSize: 13, marginBottom: 4 }}>👤 <strong>{b.user?.name || 'N/A'}</strong> &nbsp;({b.user?.email})</div>
+                        <div style={{ fontSize: 13, fontFamily: 'monospace', marginBottom: 4 }}>💳 UPI TxnID: <strong>{b.upiTransactionId || '—'}</strong></div>
+                        {b.screenshotUrl && (
+                          <a href={b.screenshotUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#6366f1', fontWeight: 600, fontSize: 13 }}>🖼️ Screenshot dekho →</a>
+                        )}
+                        {b.status === 'CONFIRMED' && b.scheduledAt && (
+                          <div style={{ fontSize: 12, color: '#0e9f6e', marginTop: 4 }}>
+                            ✅ Scheduled: {new Date(b.scheduledAt).toLocaleString('en-IN')} — <a href={b.meetLink} target="_blank" rel="noopener noreferrer">Meet Link</a>
+                          </div>
+                        )}
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-end' }}>
+                        <span style={{
+                          padding: '4px 12px', borderRadius: 6, fontSize: 12, fontWeight: 700,
+                          background: b.status === 'CONFIRMED' ? '#def7ec' : b.status === 'PENDING' ? '#fffbeb' : b.status === 'COMPLETED' ? '#e0e7ff' : '#fdf2f2',
+                          color: b.status === 'CONFIRMED' ? '#0e9f6e' : b.status === 'PENDING' ? '#d97706' : b.status === 'COMPLETED' ? '#4338ca' : '#e02424'
+                        }}>{b.status}</span>
+                        {b.status === 'PENDING' && (
+                          <div style={{ display: 'flex', gap: 8 }}>
+                            <button onClick={() => setConfirmModal(b)}
+                              style={{ padding: '8px 16px', borderRadius: 8, border: 'none', cursor: 'pointer', background: '#0e9f6e', color: '#fff', fontWeight: 700, fontSize: 13 }}>
+                              📅 Schedule
+                            </button>
+                            <button onClick={() => rejectInterview(b.id)} disabled={actionLoading === b.id + '_ivReject'}
+                              style={{ padding: '8px 16px', borderRadius: 8, border: 'none', cursor: 'pointer', background: '#e02424', color: '#fff', fontWeight: 700, fontSize: 13 }}>
+                              {actionLoading === b.id + '_ivReject' ? '...' : '❌ Reject'}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* USERS TAB */}
         {activeTab === 'users' && (
           <div>
@@ -390,6 +528,46 @@ export default function Admin() {
         )}
 
       </div>
+
+      {/* SCHEDULE INTERVIEW MODAL */}
+      {confirmModal && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
+          zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
+        }}>
+          <div style={{ background: '#fff', borderRadius: 16, padding: 28, maxWidth: 420, width: '100%' }}>
+            <h3 style={{ fontWeight: 800, marginBottom: 16 }}>📅 Schedule Interview — #{confirmModal.id}</h3>
+            <div style={{ marginBottom: 14 }}>
+              <label style={{ fontSize: 13, fontWeight: 600, marginBottom: 6, display: 'block' }}>Google Meet Link</label>
+              <input
+                value={meetLink}
+                onChange={e => setMeetLink(e.target.value)}
+                placeholder="https://meet.google.com/xxx-xxxx-xxx"
+                style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 14 }}
+              />
+            </div>
+            <div style={{ marginBottom: 20 }}>
+              <label style={{ fontSize: 13, fontWeight: 600, marginBottom: 6, display: 'block' }}>Date & Time</label>
+              <input
+                type="datetime-local"
+                value={scheduledAt}
+                onChange={e => setScheduledAt(e.target.value)}
+                style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 14 }}
+              />
+            </div>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button onClick={() => { setConfirmModal(null); setMeetLink(''); setScheduledAt(''); }}
+                style={{ flex: 1, padding: '10px', borderRadius: 8, border: '1px solid #e2e8f0', background: '#fff', cursor: 'pointer', fontWeight: 600 }}>
+                Cancel
+              </button>
+              <button onClick={confirmInterview} disabled={actionLoading === confirmModal.id + '_ivConfirm'}
+                style={{ flex: 1, padding: '10px', borderRadius: 8, border: 'none', background: '#0e9f6e', color: '#fff', cursor: 'pointer', fontWeight: 700 }}>
+                {actionLoading === confirmModal.id + '_ivConfirm' ? '...' : '✅ Confirm & Notify'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

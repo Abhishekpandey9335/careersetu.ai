@@ -17,6 +17,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import com.careersetu.entity.InterviewBooking;
+import com.careersetu.repository.InterviewBookingRepository;
+import com.careersetu.service.InterviewBookingService;
 
 @RestController
 @RequestMapping("/admin")
@@ -25,7 +28,8 @@ import java.util.stream.Collectors;
 @Tag(name = "Admin", description = "Admin-only dashboard and analytics")
 @SecurityRequirement(name = "bearerAuth")
 public class AdminController {
-
+    private final InterviewBookingRepository interviewBookingRepository;
+    private final InterviewBookingService interviewBookingService;
     private final UserRepository userRepository;
     private final JobRepository jobRepository;
     private final StudyMaterialRepository studyMaterialRepository;
@@ -42,6 +46,8 @@ public class AdminController {
         stats.put("totalSubscriptions",   subscriptionRepository.count());
         stats.put("activeSubscriptions",  subscriptionRepository.countByStatus(Subscription.SubscriptionStatus.ACTIVE));
         stats.put("pendingSubscriptions", subscriptionRepository.countByStatus(Subscription.SubscriptionStatus.PENDING));
+        stats.put("totalInterviewBookings", interviewBookingRepository.count());
+        stats.put("pendingInterviewBookings", interviewBookingRepository.countByStatus(InterviewBooking.BookingStatus.PENDING));
         return ResponseEntity.ok(ApiResponse.success(stats));
     }
 
@@ -75,6 +81,35 @@ public class AdminController {
             subs = subscriptionRepository.findAllByOrderByCreatedAtDesc();
         }
         return ResponseEntity.ok(ApiResponse.success(subs));
+    }
+    @GetMapping("/interview-bookings")
+    @Operation(summary = "Get all interview bookings")
+    public ResponseEntity<ApiResponse<List<InterviewBooking>>> getAllInterviewBookings(
+            @RequestParam(required = false) String status) {
+        List<InterviewBooking> bookings;
+        if (status != null) {
+            bookings = interviewBookingRepository.findByStatus(
+                    InterviewBooking.BookingStatus.valueOf(status.toUpperCase()));
+        } else {
+            bookings = interviewBookingRepository.findAllByOrderByCreatedAtDesc();
+        }
+        return ResponseEntity.ok(ApiResponse.success(bookings));
+    }
+
+    @PutMapping("/interview-bookings/{id}/confirm")
+    @Operation(summary = "Confirm and schedule an interview booking")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> confirmInterviewBooking(
+            @PathVariable Long id, @RequestBody Map<String, String> body) {
+        java.time.LocalDateTime scheduledAt = java.time.LocalDateTime.parse(body.get("scheduledAt"));
+        return ResponseEntity.ok(ApiResponse.success(
+                interviewBookingService.confirmBooking(id, body.get("meetLink"), scheduledAt)));
+    }
+
+    @PutMapping("/interview-bookings/{id}/reject")
+    @Operation(summary = "Reject an interview booking")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> rejectInterviewBooking(
+            @PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success(interviewBookingService.rejectBooking(id)));
     }
 
     @PutMapping("/subscriptions/{id}/approve")

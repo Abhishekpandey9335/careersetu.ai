@@ -26,6 +26,7 @@ import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsConditions from './pages/TermsConditions';
 import RefundPolicy from './pages/RefundPolicy';
 import Careers from './pages/Careers';
+import MockInterview from './pages/MockInterview';
 
 function Layout({ children }) {
   return (
@@ -51,6 +52,7 @@ export default function App() {
           <Route path="/" element={<Layout><Home /></Layout>} />
           <Route path="/private-jobs" element={<Layout><PrivateJobs /></Layout>} />
           <Route path="/internships" element={<Layout><Internships /></Layout>} />
+          <Route path="/mock-interview" element={<Layout><MockInterview /></Layout>} />
 
           {/* LearnHub */}
           <Route path="/learn" element={<Layout><LearnHub /></Layout>} />
