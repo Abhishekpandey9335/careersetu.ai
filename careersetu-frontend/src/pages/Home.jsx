@@ -285,7 +285,7 @@ export default function Home() {
                 <Link to="/private-jobs" className="section-link">View All <ChevronRight size={14} /></Link>
               </div>
               <div className="exam-cards-scroll">
-                {privateJobs.map(job => <JobCard key={job.id} job={job} />)}
+                {privateJobs.slice(0, 5).map(job => <JobCard key={job.id} job={job} />)}
               </div>
 
               {/* Salary + Company Readiness */}

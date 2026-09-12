@@ -24,6 +24,13 @@ public class DataSeeder implements CommandLineRunner {
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
+    // Below this, any salaryMin/Max value is treated as an "old buggy" raw
+    // LPA/stipend number (e.g. 3, 60) and gets converted to real rupees.
+    // Real rupee salaries are always well above this, so it's safe.
+    private static final int UNFIXED_SALARY_THRESHOLD = 1000;
+    private static final int LPA_TO_RUPEES = 100_000;
+    private static final int STIPEND_UNIT_TO_RUPEES = 1_000;
+
     private static String toJson(Object obj) {
         try { return mapper.writeValueAsString(obj); }
         catch (Exception e) { throw new RuntimeException(e); }
@@ -42,7 +49,8 @@ public class DataSeeder implements CommandLineRunner {
     @Override
     public void run(String... args) {
         seedAdminUser();
-        seedCompanies();
+        List<Company> companies = seedCompanies();
+        fixAndSeedJobs(companies);
         log.info("CareerSetu data seeder completed.");
     }
 
@@ -57,8 +65,15 @@ public class DataSeeder implements CommandLineRunner {
         log.info("Admin user created - admin@careersetu.in / Admin@123");
     }
 
-    private void seedCompanies() {
-        if (companyRepository.count() > 0) return;
+    /**
+     * Returns the list of companies — either freshly seeded (first run ever)
+     * or fetched from the DB (every run after that). Job seeding needs this
+     * list either way, so it can no longer be a void method.
+     */
+    private List<Company> seedCompanies() {
+        if (companyRepository.count() > 0) {
+            return companyRepository.findAll();
+        }
 
         List<Company> companies = List.of(
                 buildCompany("TCS", "tcs", "IT Services", 1968, "Mumbai",
@@ -113,177 +128,226 @@ public class DataSeeder implements CommandLineRunner {
         );
 
         companyRepository.saveAll(companies);
-        seedJobs(companies);
         log.info("Seeded {} companies", companies.size());
+        return companies;
     }
 
-    private void seedJobs(List<Company> companies) {
-        if (jobRepository.count() > 0) return;
+    /**
+     * Replaces the old seedJobs(). Runs on EVERY startup, safely:
+     *  1. Fixes any job whose salaryMin/Max is still in the old buggy
+     *     raw-number format (e.g. 3, 60) by converting it to real rupees.
+     *  2. Inserts only the jobs that don't already exist yet
+     *     (matched by company + title), so re-running never duplicates.
+     */
+    private void fixAndSeedJobs(List<Company> companies) {
+        Map<String, Company> bySlug = new HashMap<>();
+        for (Company c : companies) {
+            bySlug.put(c.getSlug(), c);
+        }
 
-        // companies index: 0=TCS, 1=Infosys, 2=Wipro, 3=Amazon, 4=Capgemini
-        List<Job> jobs = List.of(
-                // ---- Existing 4 original jobs ----
-                Job.builder().company(companies.get(0)).title("System Engineer").type(Job.JobType.PRIVATE)
-                        .location("Pan India").salaryMin(3).salaryMax(4)
-                        .skillsRequired(toJson(asList("Java", "SQL", "Communication"))).qualification("Any Graduate")
-                        .experienceMin(0).experienceMax(0).applyLink("https://tcs.com/careers")
-                        .status(Job.JobStatus.ACTIVE).build(),
-                Job.builder().company(companies.get(1)).title("Systems Engineer").type(Job.JobType.PRIVATE)
-                        .location("Bengaluru / Pune / Hyderabad").salaryMin(3).salaryMax(4)
-                        .skillsRequired(toJson(asList("Java", "Python", "DBMS"))).qualification("B.E / B.Tech / MCA")
-                        .experienceMin(0).experienceMax(0).applyLink("https://infosys.com/careers")
-                        .status(Job.JobStatus.ACTIVE).build(),
-                Job.builder().company(companies.get(3)).title("SDE Intern").type(Job.JobType.INTERNSHIP)
-                        .location("Hyderabad").salaryMin(60).salaryMax(100)
-                        .skillsRequired(toJson(asList("DSA", "Java or Python", "LeetCode"))).qualification("B.Tech CS/IT")
-                        .experienceMin(0).experienceMax(0).applyLink("https://amazon.jobs")
-                        .status(Job.JobStatus.ACTIVE).build(),
-                Job.builder().company(companies.get(4)).title("Analyst").type(Job.JobType.PRIVATE)
-                        .location("Mumbai / Pune / Chennai").salaryMin(4).salaryMax(5)
-                        .skillsRequired(toJson(asList("Java", "SQL", "Communication"))).qualification("Any Graduate")
-                        .experienceMin(0).experienceMax(0).applyLink("https://capgemini.com/careers")
-                        .status(Job.JobStatus.ACTIVE).build(),
+        fixBadSalaryValues();
+        seedMissingJobs(bySlug);
+    }
 
-                // ---- 20+ NEW jobs ----
-                Job.builder().company(companies.get(0)).title("Java Developer").type(Job.JobType.PRIVATE)
-                        .location("Chennai").salaryMin(4).salaryMax(6)
+    private void fixBadSalaryValues() {
+        List<Job> allJobs = jobRepository.findAll();
+        List<Job> toFix = new ArrayList<>();
+
+        for (Job job : allJobs) {
+            Integer min = job.getSalaryMin();
+            Integer max = job.getSalaryMax();
+            boolean looksUnfixed = (min != null && min < UNFIXED_SALARY_THRESHOLD)
+                    || (max != null && max < UNFIXED_SALARY_THRESHOLD);
+
+            if (looksUnfixed) {
+                int multiplier = job.getType() == Job.JobType.INTERNSHIP
+                        ? STIPEND_UNIT_TO_RUPEES
+                        : LPA_TO_RUPEES;
+                if (min != null) job.setSalaryMin(min * multiplier);
+                if (max != null) job.setSalaryMax(max * multiplier);
+                toFix.add(job);
+            }
+        }
+
+        if (!toFix.isEmpty()) {
+            jobRepository.saveAll(toFix);
+            log.info("Fixed salary values for {} existing job(s) — converted to real rupee amounts.", toFix.size());
+        }
+    }
+
+    private void seedMissingJobs(Map<String, Company> bySlug) {
+        List<Job> existingJobs = jobRepository.findAll();
+        Set<String> existingKeys = new HashSet<>();
+        for (Job j : existingJobs) {
+            if (j.getCompany() != null) {
+                existingKeys.add(j.getCompany().getId() + "::" + j.getTitle());
+            }
+        }
+
+        List<Job> candidates = buildNewJobs(bySlug);
+        List<Job> toInsert = new ArrayList<>();
+        for (Job job : candidates) {
+            String key = job.getCompany().getId() + "::" + job.getTitle();
+            if (!existingKeys.contains(key)) {
+                toInsert.add(job);
+            }
+        }
+
+        if (!toInsert.isEmpty()) {
+            jobRepository.saveAll(toInsert);
+            log.info("Seeded {} new job(s).", toInsert.size());
+        }
+    }
+
+    /**
+     * All values here are already REAL RUPEES — no further conversion needed.
+     */
+    private List<Job> buildNewJobs(Map<String, Company> bySlug) {
+        Company tcs = bySlug.get("tcs");
+        Company infosys = bySlug.get("infosys");
+        Company wipro = bySlug.get("wipro");
+        Company amazon = bySlug.get("amazon");
+        Company capgemini = bySlug.get("capgemini");
+
+        return new ArrayList<>(List.of(
+                Job.builder().company(tcs).title("Java Developer").type(Job.JobType.PRIVATE)
+                        .location("Chennai").salaryMin(400000).salaryMax(600000)
                         .skillsRequired(toJson(asList("Java", "Spring Boot", "REST API"))).qualification("B.Tech/MCA")
                         .experienceMin(0).experienceMax(2).applyLink("https://tcs.com/careers")
                         .status(Job.JobStatus.ACTIVE).build(),
 
-                Job.builder().company(companies.get(0)).title("Business Analyst").type(Job.JobType.PRIVATE)
-                        .location("Mumbai").salaryMin(4).salaryMax(6)
+                Job.builder().company(tcs).title("Business Analyst").type(Job.JobType.PRIVATE)
+                        .location("Mumbai").salaryMin(400000).salaryMax(600000)
                         .skillsRequired(toJson(asList("SQL", "Excel", "Communication"))).qualification("Any Graduate")
                         .experienceMin(0).experienceMax(1).applyLink("https://tcs.com/careers")
                         .status(Job.JobStatus.ACTIVE).build(),
 
-                Job.builder().company(companies.get(0)).title("QA / Test Engineer").type(Job.JobType.PRIVATE)
-                        .location("Kolkata").salaryMin(3).salaryMax(5)
+                Job.builder().company(tcs).title("QA / Test Engineer").type(Job.JobType.PRIVATE)
+                        .location("Kolkata").salaryMin(300000).salaryMax(500000)
                         .skillsRequired(toJson(asList("Manual Testing", "Selenium", "SQL"))).qualification("B.Tech/BCA")
                         .experienceMin(0).experienceMax(2).applyLink("https://tcs.com/careers")
                         .status(Job.JobStatus.ACTIVE).build(),
 
-                Job.builder().company(companies.get(1)).title("Full Stack Developer").type(Job.JobType.PRIVATE)
-                        .location("Pune").salaryMin(5).salaryMax(8)
+                Job.builder().company(infosys).title("Full Stack Developer").type(Job.JobType.PRIVATE)
+                        .location("Pune").salaryMin(500000).salaryMax(800000)
                         .skillsRequired(toJson(asList("React", "Node.js", "MongoDB"))).qualification("B.Tech")
                         .experienceMin(1).experienceMax(3).applyLink("https://career.infosys.com")
                         .status(Job.JobStatus.ACTIVE).build(),
 
-                Job.builder().company(companies.get(1)).title("Cloud Support Engineer").type(Job.JobType.PRIVATE)
-                        .location("Bengaluru").salaryMin(5).salaryMax(7)
+                Job.builder().company(infosys).title("Cloud Support Engineer").type(Job.JobType.PRIVATE)
+                        .location("Bengaluru").salaryMin(500000).salaryMax(700000)
                         .skillsRequired(toJson(asList("AWS", "Azure", "Linux"))).qualification("B.Tech")
                         .experienceMin(0).experienceMax(2).applyLink("https://career.infosys.com")
                         .status(Job.JobStatus.ACTIVE).build(),
 
-                Job.builder().company(companies.get(1)).title("Data Analyst").type(Job.JobType.PRIVATE)
-                        .location("Hyderabad").salaryMin(4).salaryMax(6)
+                Job.builder().company(infosys).title("Data Analyst").type(Job.JobType.PRIVATE)
+                        .location("Hyderabad").salaryMin(400000).salaryMax(600000)
                         .skillsRequired(toJson(asList("SQL", "Power BI", "Python"))).qualification("B.Tech/B.Sc")
                         .experienceMin(0).experienceMax(2).applyLink("https://career.infosys.com")
                         .status(Job.JobStatus.ACTIVE).build(),
 
-                Job.builder().company(companies.get(2)).title("Project Engineer").type(Job.JobType.PRIVATE)
-                        .location("Noida").salaryMin(3).salaryMax(5)
+                Job.builder().company(wipro).title("Project Engineer").type(Job.JobType.PRIVATE)
+                        .location("Noida").salaryMin(300000).salaryMax(500000)
                         .skillsRequired(toJson(asList("Java", "SQL", "Problem Solving"))).qualification("B.E/B.Tech")
                         .experienceMin(0).experienceMax(1).applyLink("https://careers.wipro.com")
                         .status(Job.JobStatus.ACTIVE).build(),
 
-                Job.builder().company(companies.get(2)).title("DevOps Engineer").type(Job.JobType.PRIVATE)
-                        .location("Bengaluru").salaryMin(6).salaryMax(9)
+                Job.builder().company(wipro).title("DevOps Engineer").type(Job.JobType.PRIVATE)
+                        .location("Bengaluru").salaryMin(600000).salaryMax(900000)
                         .skillsRequired(toJson(asList("Docker", "Kubernetes", "CI/CD"))).qualification("B.Tech")
                         .experienceMin(1).experienceMax(3).applyLink("https://careers.wipro.com")
                         .status(Job.JobStatus.ACTIVE).build(),
 
-                Job.builder().company(companies.get(2)).title("Network Engineer").type(Job.JobType.PRIVATE)
-                        .location("Chennai").salaryMin(3).salaryMax(5)
+                Job.builder().company(wipro).title("Network Engineer").type(Job.JobType.PRIVATE)
+                        .location("Chennai").salaryMin(300000).salaryMax(500000)
                         .skillsRequired(toJson(asList("Networking", "CCNA", "Troubleshooting"))).qualification("B.Tech/Diploma")
                         .experienceMin(0).experienceMax(2).applyLink("https://careers.wipro.com")
                         .status(Job.JobStatus.ACTIVE).build(),
 
-                Job.builder().company(companies.get(3)).title("Data Engineer").type(Job.JobType.PRIVATE)
-                        .location("Bengaluru").salaryMin(12).salaryMax(20)
+                Job.builder().company(amazon).title("Data Engineer").type(Job.JobType.PRIVATE)
+                        .location("Bengaluru").salaryMin(1200000).salaryMax(2000000)
                         .skillsRequired(toJson(asList("Python", "Spark", "SQL", "AWS"))).qualification("B.Tech")
                         .experienceMin(1).experienceMax(4).applyLink("https://amazon.jobs")
                         .status(Job.JobStatus.ACTIVE).build(),
 
-                Job.builder().company(companies.get(3)).title("Business Development Associate").type(Job.JobType.PRIVATE)
-                        .location("Delhi NCR").salaryMin(6).salaryMax(9)
+                Job.builder().company(amazon).title("Business Development Associate").type(Job.JobType.PRIVATE)
+                        .location("Delhi NCR").salaryMin(600000).salaryMax(900000)
                         .skillsRequired(toJson(asList("Communication", "Sales", "Excel"))).qualification("Any Graduate")
                         .experienceMin(0).experienceMax(2).applyLink("https://amazon.jobs")
                         .status(Job.JobStatus.ACTIVE).build(),
 
-                Job.builder().company(companies.get(3)).title("Operations Manager").type(Job.JobType.PRIVATE)
-                        .location("Hyderabad").salaryMin(8).salaryMax(12)
+                Job.builder().company(amazon).title("Operations Manager").type(Job.JobType.PRIVATE)
+                        .location("Hyderabad").salaryMin(800000).salaryMax(1200000)
                         .skillsRequired(toJson(asList("Leadership", "Excel", "Process Improvement"))).qualification("Any Graduate/MBA")
                         .experienceMin(2).experienceMax(5).applyLink("https://amazon.jobs")
                         .status(Job.JobStatus.ACTIVE).build(),
 
-                Job.builder().company(companies.get(4)).title("Software Developer").type(Job.JobType.PRIVATE)
-                        .location("Bengaluru").salaryMin(5).salaryMax(8)
+                Job.builder().company(capgemini).title("Software Developer").type(Job.JobType.PRIVATE)
+                        .location("Bengaluru").salaryMin(500000).salaryMax(800000)
                         .skillsRequired(toJson(asList("Java", "Angular", "Microservices"))).qualification("B.Tech")
                         .experienceMin(0).experienceMax(2).applyLink("https://www.capgemini.com/in-en/careers")
                         .status(Job.JobStatus.ACTIVE).build(),
 
-                Job.builder().company(companies.get(4)).title("Technical Support Engineer").type(Job.JobType.PRIVATE)
-                        .location("Pune").salaryMin(3).salaryMax(5)
+                Job.builder().company(capgemini).title("Technical Support Engineer").type(Job.JobType.PRIVATE)
+                        .location("Pune").salaryMin(300000).salaryMax(500000)
                         .skillsRequired(toJson(asList("Troubleshooting", "SQL", "Communication"))).qualification("Any Graduate")
                         .experienceMin(0).experienceMax(2).applyLink("https://www.capgemini.com/in-en/careers")
                         .status(Job.JobStatus.ACTIVE).build(),
 
-                Job.builder().company(companies.get(4)).title("HR Executive").type(Job.JobType.PRIVATE)
-                        .location("Mumbai").salaryMin(3).salaryMax(5)
+                Job.builder().company(capgemini).title("HR Executive").type(Job.JobType.PRIVATE)
+                        .location("Mumbai").salaryMin(300000).salaryMax(500000)
                         .skillsRequired(toJson(asList("Recruitment", "Communication", "MS Office"))).qualification("MBA HR")
                         .experienceMin(0).experienceMax(2).applyLink("https://www.capgemini.com/in-en/careers")
                         .status(Job.JobStatus.ACTIVE).build(),
 
-                Job.builder().company(companies.get(0)).title(".NET Developer").type(Job.JobType.PRIVATE)
-                        .location("Indore").salaryMin(4).salaryMax(6)
+                Job.builder().company(tcs).title(".NET Developer").type(Job.JobType.PRIVATE)
+                        .location("Indore").salaryMin(400000).salaryMax(600000)
                         .skillsRequired(toJson(asList("C#", ".NET Core", "SQL Server"))).qualification("B.Tech/MCA")
                         .experienceMin(0).experienceMax(2).applyLink("https://tcs.com/careers")
                         .status(Job.JobStatus.ACTIVE).build(),
 
-                Job.builder().company(companies.get(1)).title("UI/UX Designer").type(Job.JobType.PRIVATE)
-                        .location("Pune").salaryMin(4).salaryMax(7)
+                Job.builder().company(infosys).title("UI/UX Designer").type(Job.JobType.PRIVATE)
+                        .location("Pune").salaryMin(400000).salaryMax(700000)
                         .skillsRequired(toJson(asList("Figma", "Adobe XD", "Wireframing"))).qualification("Any Graduate")
                         .experienceMin(0).experienceMax(2).applyLink("https://career.infosys.com")
                         .status(Job.JobStatus.ACTIVE).build(),
 
-                Job.builder().company(companies.get(2)).title("Digital Marketing Executive").type(Job.JobType.PRIVATE)
-                        .location("Remote").salaryMin(3).salaryMax(5)
+                Job.builder().company(wipro).title("Digital Marketing Executive").type(Job.JobType.PRIVATE)
+                        .location("Remote").salaryMin(300000).salaryMax(500000)
                         .skillsRequired(toJson(asList("SEO", "Google Ads", "Content Marketing"))).qualification("Any Graduate")
                         .experienceMin(0).experienceMax(2).applyLink("https://careers.wipro.com")
                         .status(Job.JobStatus.ACTIVE).build(),
 
-                Job.builder().company(companies.get(3)).title("Machine Learning Intern").type(Job.JobType.INTERNSHIP)
-                        .location("Bengaluru").salaryMin(50).salaryMax(80)
+                Job.builder().company(amazon).title("Machine Learning Intern").type(Job.JobType.INTERNSHIP)
+                        .location("Bengaluru").salaryMin(50000).salaryMax(80000)
                         .skillsRequired(toJson(asList("Python", "TensorFlow", "Statistics"))).qualification("B.Tech CS/IT")
                         .experienceMin(0).experienceMax(0).applyLink("https://amazon.jobs")
                         .status(Job.JobStatus.ACTIVE).build(),
 
-                Job.builder().company(companies.get(4)).title("Content Writer").type(Job.JobType.PRIVATE)
-                        .location("Remote").salaryMin(2).salaryMax(4)
+                Job.builder().company(capgemini).title("Content Writer").type(Job.JobType.PRIVATE)
+                        .location("Remote").salaryMin(200000).salaryMax(400000)
                         .skillsRequired(toJson(asList("Content Writing", "SEO", "English"))).qualification("Any Graduate")
                         .experienceMin(0).experienceMax(2).applyLink("https://www.capgemini.com/in-en/careers")
                         .status(Job.JobStatus.ACTIVE).build(),
 
-                Job.builder().company(companies.get(0)).title("Cybersecurity Analyst").type(Job.JobType.PRIVATE)
-                        .location("Gurugram").salaryMin(6).salaryMax(10)
+                Job.builder().company(tcs).title("Cybersecurity Analyst").type(Job.JobType.PRIVATE)
+                        .location("Gurugram").salaryMin(600000).salaryMax(1000000)
                         .skillsRequired(toJson(asList("Network Security", "SIEM", "Linux"))).qualification("B.Tech")
                         .experienceMin(1).experienceMax(3).applyLink("https://tcs.com/careers")
                         .status(Job.JobStatus.ACTIVE).build(),
 
-                Job.builder().company(companies.get(1)).title("Mobile App Developer (Android)").type(Job.JobType.PRIVATE)
-                        .location("Bengaluru").salaryMin(5).salaryMax(8)
+                Job.builder().company(infosys).title("Mobile App Developer (Android)").type(Job.JobType.PRIVATE)
+                        .location("Bengaluru").salaryMin(500000).salaryMax(800000)
                         .skillsRequired(toJson(asList("Kotlin", "Android SDK", "Firebase"))).qualification("B.Tech")
                         .experienceMin(1).experienceMax(3).applyLink("https://career.infosys.com")
                         .status(Job.JobStatus.ACTIVE).build(),
 
-                Job.builder().company(companies.get(2)).title("Customer Support Executive").type(Job.JobType.PRIVATE)
-                        .location("Kochi").salaryMin(2).salaryMax(4)
+                Job.builder().company(wipro).title("Customer Support Executive").type(Job.JobType.PRIVATE)
+                        .location("Kochi").salaryMin(200000).salaryMax(400000)
                         .skillsRequired(toJson(asList("Communication", "CRM", "Problem Solving"))).qualification("Any Graduate")
                         .experienceMin(0).experienceMax(1).applyLink("https://careers.wipro.com")
                         .status(Job.JobStatus.ACTIVE).build()
-        );
-        jobRepository.saveAll(jobs);
+        ));
     }
 
     private Company buildCompany(String name, String slug, String industry, int founded,
