@@ -12,6 +12,7 @@ const navLinks = [
   { label: 'Home', path: '/' },
   { label: 'Private Jobs', path: '/private-jobs' },
   { label: 'Internships', path: '/internships' },
+  { label: 'Mock Interview', path: '/mock-interview' },
   { label: 'Companies', path: '/companies' },
   { label: 'Strategies', path: '/learn' },
   { label: 'Lectures', path: '/lectures' },
