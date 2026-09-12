@@ -12,7 +12,7 @@ export default function Careers() {
   return (
     <div style={{ background: 'var(--bg)', minHeight: '100vh' }}>
       <div style={{ background: 'linear-gradient(135deg, #1a56db 0%, #7e3af2 100%)', padding: '60px 20px', textAlign: 'center', color: 'white' }}>
-        <h1 style={{ fontSize: 36, fontWeight: 800, marginBottom: 12 }}>Careers at CareerSetu</h1>
+        <h1 style={{ fontSize: 36, fontWeight: 800, marginBottom: 12 }}>Careers at Ai Rojgar</h1>
         <p style={{ fontSize: 18, opacity: 0.9 }}>Join our mission to empower millions of students across India 🚀</p>
       </div>
 

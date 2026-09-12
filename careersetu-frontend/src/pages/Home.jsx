@@ -2,11 +2,13 @@
 import { Link, useNavigate } from 'react-router-dom';
 import {
   ArrowRight, ChevronRight, Sparkles, Bot, Send,
-  CheckCircle, TrendingUp, MapPin, Briefcase, Clock
+  CheckCircle, TrendingUp, MapPin, Briefcase, Clock,
+  Play, Target, Building2, GraduationCap, Rocket,
+  BookOpen, PlayCircle
 } from 'lucide-react';
 import {
   privateJobs, roadmaps, companies,
-  successStories, quickLinksData
+  successStories
 } from '../data/mockData';
 import './Home.css';
 
@@ -15,6 +17,11 @@ const companyColors = {
   Accenture: '#a100ff', Capgemini: '#0070ad', Google: '#ea4335',
   Microsoft: '#00a4ef', Flipkart: '#2874f0'
 };
+
+const topHiringCompanies = [
+  'TCS', 'Infosys', 'Accenture', 'Wipro', 'Amazon',
+  'Microsoft', 'Google', 'Deloitte', 'IBM', 'Capgemini'
+];
 
 function formatSalary(min, max) {
   const fmt = (v) => v >= 100000 ? `${(v/100000).toFixed(0)}L` : `${(v/1000).toFixed(0)}K`;
@@ -102,11 +109,20 @@ function AiWidget() {
   );
 }
 
+const quickAccessItems = [
+  { icon: <Briefcase size={20} />, title: 'Private Jobs', desc: 'Handpicked job opportunities from top companies.', path: '/private-jobs', color: '#db2777', bg: '#fce7f3' },
+  { icon: <GraduationCap size={20} />, title: 'Internships', desc: 'Gain real-world experience and build your future.', path: '/internships', color: '#0e9f6e', bg: '#dcfce7' },
+  { icon: <Bot size={20} />, title: 'AI Advisor', desc: 'Get personalized career guidance & recommendations.', path: '/ai-advisor', color: '#d97706', bg: '#fef3c7' },
+  { icon: <Target size={20} />, title: 'Strategies', desc: 'PDFs • Roadmaps • Resources for your success.', path: '/learn', color: '#7c3aed', bg: '#ede9fe' },
+  { icon: <PlayCircle size={20} />, title: 'Lectures', desc: 'Free & Premium Video Lectures.', path: '/lectures', color: '#2563eb', bg: '#dbeafe' },
+];
+
 export default function Home() {
   return (
     <div className="home">
       {/* Hero */}
       <section className="hero">
+        <div className="hero-blob" />
         <div className="container">
           <div className="hero-grid">
             <div className="hero-left fade-in-up">
@@ -118,8 +134,9 @@ export default function Home() {
                 <span className="gradient-text">Ab Reality Hai.</span>
               </h1>
               <p className="hero-subtitle">
-                AI jo samjhe tumhe, jobs jo match kare tumhari skills se,<br />
-                roadmap jo le jaye seedha selection tak. Career banane ka asli raasta — yahan.
+                Airojgar.in aapke career dreams ko haqeeqat banane ke liye bana hai.
+                Yahan aapko milte hain latest private jobs, internships, top companies,
+                career guidance aur expert strategies – sab ek hi jagah.
               </p>
               <div className="hero-stats">
                 {[['15K+', 'Jobs'], ['5K+', 'Internships'], ['500+', 'Companies'], ['10K+', 'Study Materials']].map(([num, label]) => (
@@ -129,84 +146,130 @@ export default function Home() {
                   </div>
                 ))}
               </div>
-              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 16 }}>
+              <div className="hero-actions">
                 <Link to="/private-jobs" className="btn btn-primary btn-lg">
-                  💼 Find Private Jobs <ArrowRight size={16} />
+                  <Briefcase size={16} /> Find Private Jobs <ArrowRight size={16} />
                 </Link>
                 <Link to="/ai-advisor" className="btn btn-outline btn-lg">
-                  🤖 Get My Career Match
+                  <Bot size={16} /> Get My Career Match
                 </Link>
               </div>
             </div>
 
             <div className="hero-right fade-in-up" style={{ animationDelay: '0.1s' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                {[
-                  { icon: '💼', title: 'Private Jobs', desc: '15,000+ openings', color: '#7e3af2', path: '/private-jobs' },
-                  { icon: '🎓', title: 'Internships', desc: '5,000+ opportunities', color: '#0e9f6e', path: '/internships' },
-                  { icon: '🤖', title: 'AI Advisor', desc: 'Personalized guidance', color: '#f59e0b', path: '/ai-advisor' },
-                  { icon: '🎯', title: 'Strategies', desc: 'PDFs · Roadmaps · Resources', color: '#ef4444', path: '/learn' },
-                  { icon: '📊', title: 'Companies', desc: 'Top company insights', color: '#0ea5e9', path: '/company-explorer' },
-                  { icon: '▶️', title: 'Lectures', desc: 'Free & Premium Videos', color: '#1a56db', path: '/lectures' },
-                ].map(item => (
-                  <Link key={item.title} to={item.path} style={{ textDecoration: 'none' }}>
-                    <div style={{
-                      background: 'white',
-                      borderRadius: 16,
-                      padding: '20px 16px',
-                      boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-                      border: '1px solid #e5e7eb',
-                      cursor: 'pointer',
-                      transition: 'transform 0.2s, box-shadow 0.2s',
-                      textAlign: 'center',
-                    }}
-                    onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 8px 30px rgba(0,0,0,0.12)'; }}
-                    onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.08)'; }}
-                    >
-                      <div style={{ fontSize: 32, marginBottom: 8 }}>{item.icon}</div>
-                      <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 4 }}>{item.title}</div>
-                      <div style={{ fontSize: 12, color: item.color, fontWeight: 600 }}>{item.desc}</div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-
-              <div style={{
-                marginTop: 16,
-                background: 'linear-gradient(135deg, #1a56db 0%, #7e3af2 100%)',
-                borderRadius: 16,
-                padding: '20px 24px',
-                color: 'white',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: 12,
-              }}>
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 4 }}>🤖 Try AI Career Advisor</div>
-                  <div style={{ fontSize: 13, opacity: 0.9 }}>Get personalized job & career recommendations in seconds</div>
+              <div className="hero-visual">
+                <div className="float-card float-card-1">
+                  <div className="float-card-icon" style={{ background: '#e0e7ff', color: '#4f46e5' }}><Bot size={18} /></div>
+                  <div>
+                    <div className="float-card-title">AI Career Advisor</div>
+                    <div className="float-card-sub">Personalized guidance</div>
+                  </div>
+                  <ChevronRight size={16} className="float-card-arrow" />
                 </div>
-                <Link to="/ai-advisor" className="btn" style={{ background: 'white', color: '#1a56db', fontWeight: 700, whiteSpace: 'nowrap', padding: '8px 16px', borderRadius: 8, fontSize: 13 }}>
-                  Try Now →
-                </Link>
+
+                <div className="float-card float-card-2">
+                  <div className="float-card-icon" style={{ background: '#dbeafe', color: '#2563eb' }}><Briefcase size={18} /></div>
+                  <div>
+                    <div className="float-card-title">Interview Preparation</div>
+                    <div className="float-card-sub">Mock tests &amp; tips</div>
+                  </div>
+                  <ChevronRight size={16} className="float-card-arrow" />
+                </div>
+
+                <div className="float-card float-card-3">
+                  <div className="float-card-icon" style={{ background: '#ede9fe', color: '#7c3aed' }}><Building2 size={18} /></div>
+                  <div>
+                    <div className="float-card-title">Top Companies</div>
+                    <div className="float-card-sub">Explore hiring now</div>
+                  </div>
+                  <ChevronRight size={16} className="float-card-arrow" />
+                </div>
+
+                <div className="speech-bubble">
+                  <Target size={14} />
+                  <span>Right Guidance<br />Better Opportunities</span>
+                </div>
+
+                <div className="hero-tagline">Build<br />Your Future</div>
+
+                <div className="video-pill">
+                  <span className="video-play"><Play size={12} fill="white" /></span>
+                  <div>
+                    <div className="video-pill-title">Watch Intro Video</div>
+                    <div className="video-pill-sub">2 min</div>
+                  </div>
+                </div>
+
+                <div className="mug-tag">Better Skills<br />Bigger Opportunities</div>
+
+                <div className="device-mockup">
+                  <div className="device-screen">
+                    <div className="device-topbar">
+                      <Rocket size={13} /> Airojgar.in
+                    </div>
+                    <h4 className="device-heading">Your Dream Job Awaits</h4>
+                    <div className="device-search">
+                      <span>Search jobs, internships, companies...</span>
+                      <span className="device-search-btn">→</span>
+                    </div>
+                    <div className="device-icons">
+                      {[
+                        { icon: <Briefcase size={16} />, label: 'Jobs' },
+                        { icon: <GraduationCap size={16} />, label: 'Internships' },
+                        { icon: <Building2 size={16} />, label: 'Companies' },
+                        { icon: <BookOpen size={16} />, label: 'Study Materials' },
+                      ].map(i => (
+                        <div key={i.label} className="device-icon-item">
+                          <div className="device-icon-box">{i.icon}</div>
+                          <span>{i.label}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="device-base" />
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* Quick links bar */}
-      <section className="quick-links-bar">
-        <div className="container">
-          <div className="quick-links-grid">
-            {quickLinksData.map(ql => (
-              <Link key={ql.label} to={ql.path} className="quick-link-item">
-                <div className="quick-link-icon" style={{ background: ql.color + '15', color: ql.color }}>
-                  {ql.icon}
-                </div>
-                <span>{ql.label}</span>
-              </Link>
-            ))}
+          {/* Top Hiring Companies strip */}
+          <div className="companies-strip">
+            <div className="companies-strip-label">
+              <div className="companies-strip-icon"><Building2 size={18} /></div>
+              <div>
+                <div className="companies-strip-title">Top Hiring Companies</div>
+                <div className="companies-strip-sub">Get placed at dream companies</div>
+              </div>
+            </div>
+            <div className="companies-strip-logos">
+              {topHiringCompanies.map(name => (
+                <span key={name} className="company-pill" style={{ color: companyColors[name] || '#1a1f3a' }}>
+                  {name}
+                </span>
+              ))}
+            </div>
+            <Link to="/company-explorer" className="section-link strip-view-all">View All <ChevronRight size={14} /></Link>
+          </div>
+
+          {/* Quick Access */}
+          <div className="quick-access">
+            <div className="quick-access-header">
+              <div>
+                <div className="quick-access-title"><Sparkles size={16} /> Quick Access</div>
+                <div className="quick-access-sub">Explore what you need, faster.</div>
+              </div>
+              <Link to="/learn" className="section-link">View All <ChevronRight size={14} /></Link>
+            </div>
+            <div className="quick-access-grid">
+              {quickAccessItems.map(item => (
+                <Link key={item.title} to={item.path} className="quick-access-card" style={{ background: item.bg }}>
+                  <div className="quick-access-icon" style={{ color: item.color, background: '#ffffffb3' }}>{item.icon}</div>
+                  <div className="quick-access-title-sm" style={{ color: item.color }}>{item.title}</div>
+                  <div className="quick-access-desc">{item.desc}</div>
+                  <ArrowRight size={15} className="quick-access-arrow" style={{ color: item.color }} />
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </section>

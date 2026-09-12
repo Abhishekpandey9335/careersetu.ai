@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Search, Bell, Menu, X, ChevronDown, Sparkles, LogOut, LayoutDashboard, Crown, BookOpen } from 'lucide-react';
+import {
+  Search, Bell, Menu, X, ChevronDown, Sparkles, LogOut,
+  LayoutDashboard, Crown, BookOpen
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import logo from '../assets/logo.png';
 import './Navbar.css';
@@ -13,6 +16,7 @@ const navLinks = [
   { label: 'Strategies', path: '/learn' },
   { label: 'Lectures', path: '/lectures' },
 ];
+
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -29,7 +33,6 @@ export default function Navbar() {
 
   const isActive = (path) => {
     if (path === '/') return location.pathname === '/';
-    // Also highlight "Learn" when on old URLs
     if (path === '/learn') {
       return location.pathname.startsWith('/learn')
         || location.pathname.startsWith('/study-material')
@@ -56,23 +59,25 @@ export default function Navbar() {
               {link.label}
             </Link>
           ))}
-          <Link to="/ai-advisor" className="nav-link nav-link-ai">
+        </div>
+
+        <div className="navbar-right">
+          <Link to="/ai-advisor" className="ai-advisor-pill">
             <Sparkles size={14} />
             AI Advisor
             <span className="new-badge">New</span>
           </Link>
+
           {isLoggedIn && (
             <Link
               to="/dashboard"
-              className={`nav-link nav-link-dashboard ${location.pathname === '/dashboard' ? 'active' : ''}`}
+              className={`dashboard-link ${location.pathname === '/dashboard' ? 'active' : ''}`}
             >
-              <LayoutDashboard size={14} />
+              <LayoutDashboard size={15} />
               Dashboard
             </Link>
           )}
-        </div>
 
-        <div className="navbar-right">
           <div className={`search-wrap ${searchOpen ? 'open' : ''}`}>
             {searchOpen ? (
               <form onSubmit={handleSearch} className="search-form">
@@ -153,7 +158,7 @@ export default function Navbar() {
             </Link>
           ))}
           <Link to="/ai-advisor" className="mobile-nav-link ai-link" onClick={() => setMobileOpen(false)}>
-            <Sparkles size={14} /> AI Advisor
+            <Sparkles size={14} /> AI Advisor <span className="new-badge">New</span>
           </Link>
           {isLoggedIn && (
             <Link to="/dashboard" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>
